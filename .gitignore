@@ -1,0 +1,12 @@
+# MetaTrader build output
+*.ex5
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Editor and OS metadata
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
