@@ -17,35 +17,44 @@ private:
               type == ORDER_TYPE_BUY_STOP_LIMIT || type == ORDER_TYPE_SELL_STOP_LIMIT);
      }
 
-   bool ValidatePendingPrices(const string symbol, const TradeSetup &setup) const
+   PendingPriceValidation ValidatePendingPrices(const string symbol,
+                                                const TradeSetup &setup) const
      {
       const MqlTick tick = {};
       MqlTick current_tick = tick;
       if(!SymbolInfoTick(symbol, current_tick))
-         return false;
+         return PENDING_PRICE_RETRYABLE;
 
       const double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
       const double minimum_distance = (double)SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL) * point;
 
       if(setup.swing.direction == SWING_DIRECTION_BULLISH)
         {
-         return (setup.entry < current_tick.ask && setup.stop_loss < setup.entry &&
-                 setup.take_profit > setup.entry &&
-                 current_tick.ask - setup.entry >= minimum_distance &&
-                 setup.entry - setup.stop_loss >= minimum_distance &&
-                 setup.take_profit - setup.entry >= minimum_distance);
+         if(setup.stop_loss >= setup.entry || setup.take_profit <= setup.entry ||
+            setup.entry - setup.stop_loss < minimum_distance ||
+            setup.take_profit - setup.entry < minimum_distance)
+            return PENDING_PRICE_PERMANENTLY_INVALID;
+         if(setup.entry >= current_tick.ask)
+            return PENDING_PRICE_PERMANENTLY_INVALID;
+         if(current_tick.ask - setup.entry < minimum_distance)
+            return PENDING_PRICE_RETRYABLE;
+         return PENDING_PRICE_VALID;
         }
 
       if(setup.swing.direction == SWING_DIRECTION_BEARISH)
         {
-         return (setup.entry > current_tick.bid && setup.stop_loss > setup.entry &&
-                 setup.take_profit < setup.entry &&
-                 setup.entry - current_tick.bid >= minimum_distance &&
-                 setup.stop_loss - setup.entry >= minimum_distance &&
-                 setup.entry - setup.take_profit >= minimum_distance);
+         if(setup.stop_loss <= setup.entry || setup.take_profit >= setup.entry ||
+            setup.stop_loss - setup.entry < minimum_distance ||
+            setup.entry - setup.take_profit < minimum_distance)
+            return PENDING_PRICE_PERMANENTLY_INVALID;
+         if(setup.entry <= current_tick.bid)
+            return PENDING_PRICE_PERMANENTLY_INVALID;
+         if(setup.entry - current_tick.bid < minimum_distance)
+            return PENDING_PRICE_RETRYABLE;
+         return PENDING_PRICE_VALID;
         }
 
-      return false;
+      return PENDING_PRICE_PERMANENTLY_INVALID;
      }
 
 public:
@@ -104,14 +113,26 @@ public:
       return success;
      }
 
-   bool PlacePendingOrder(const string symbol,
-                          const TradeSetup &setup,
-                          const string comment)
+   PendingOrderResult PlacePendingOrder(const string symbol,
+                                        const TradeSetup &setup,
+                                        const string comment)
      {
-      if(!setup.valid || setup.volume <= 0.0 || !ValidatePendingPrices(symbol, setup))
+      if(!setup.valid || setup.volume <= 0.0)
         {
-         Print("Pending order rejected by local price or volume validation.");
-         return false;
+         Print("Pending order rejected because the setup or volume is invalid.");
+         return PENDING_ORDER_INVALID_SETUP;
+        }
+
+      const PendingPriceValidation price_validation = ValidatePendingPrices(symbol, setup);
+      if(price_validation == PENDING_PRICE_PERMANENTLY_INVALID)
+        {
+         Print("Pending order rejected because its price geometry is no longer valid.");
+         return PENDING_ORDER_INVALID_SETUP;
+        }
+      if(price_validation == PENDING_PRICE_RETRYABLE)
+        {
+         Print("Pending order deferred because current quote or stop-distance conditions are temporary.");
+         return PENDING_ORDER_BROKER_REJECTED;
         }
 
       m_trade.SetTypeFillingBySymbol(symbol);
@@ -130,8 +151,12 @@ public:
         }
 
       if(!placed)
+        {
          PrintFormat("Unable to place pending order: %s", m_trade.ResultRetcodeDescription());
-      return placed;
+         return PENDING_ORDER_BROKER_REJECTED;
+        }
+
+      return PENDING_ORDER_PLACED;
      }
   };
 

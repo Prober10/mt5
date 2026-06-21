@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -132,16 +132,37 @@ void OnTick(void)
                                    InpStopBuffer, setup))
       return;
 
-   setup.volume = g_risk_manager.CalculateVolume(_Symbol, swing.direction,
-                                                  setup.entry, setup.stop_loss,
-                                                  InpRiskPercent);
-   if(setup.volume <= 0.0)
+   double closed_loss = 0.0;
+   double loss_limit = 0.0;
+   double remaining_budget = 0.0;
+   if(!g_risk_manager.GetRemainingDailyLossBudget(
+         InpMagicNumber, InpMaxDailyClosedLossPercent,
+         closed_loss, loss_limit, remaining_budget))
      {
-      Print("Setup skipped because a compliant trade volume could not be calculated.");
+      Print("Setup skipped because the remaining daily risk budget could not be calculated.");
       return;
      }
 
-   if(g_trade_manager.PlacePendingOrder(_Symbol, setup, InpOrderComment))
+   setup.volume = g_risk_manager.CalculateVolume(_Symbol, swing.direction,
+                                                  setup.entry, setup.stop_loss,
+                                                  InpRiskPercent, remaining_budget);
+   if(setup.volume <= 0.0)
+     {
+      PrintFormat("Setup skipped because a compliant volume could not fit the remaining daily risk budget of %.2f.",
+                  remaining_budget);
+      return;
+     }
+
+   const PendingOrderResult order_result =
+      g_trade_manager.PlacePendingOrder(_Symbol, setup, InpOrderComment);
+   if(order_result == PENDING_ORDER_INVALID_SETUP)
+     {
+      g_setup_tracker.MarkProcessed(swing);
+      Print("Setup marked as processed after permanent local validation rejection.");
+      return;
+     }
+
+   if(order_result == PENDING_ORDER_PLACED)
      {
       g_setup_tracker.MarkProcessed(swing);
       PrintFormat("Placed %s limit: volume %.2f, entry %.*f, SL %.*f, TP %.*f",

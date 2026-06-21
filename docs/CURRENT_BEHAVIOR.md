@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.00 of
+This document describes the behavior implemented by version 1.01 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -46,6 +46,8 @@ distance or is on the wrong side of the current market.
 - Default risk is 0.5% of current account equity.
 - The EA uses `OrderCalcProfit` to estimate the entry-to-stop loss for one lot.
 - Volume is rounded down to the broker's volume step and capped at its maximum.
+- New-order risk is capped at the smaller of the configured equity risk and the
+  remaining daily closed-loss allowance.
 - A setup is skipped when the broker's minimum volume would exceed the risk
   allowance or a compliant volume cannot be calculated.
 
@@ -60,7 +62,12 @@ distance or is on the wrong side of the current market.
 - The default limit is 1% of the reconstructed day-start balance.
 - Once the limit is reached, the EA cancels its pending orders and blocks new
   setups until the next broker day.
+- Before placing an order, the EA reserves enough remaining allowance for the
+  full calculated entry-to-stop loss. This prevents a new trade's planned loss
+  from knowingly carrying the closed-loss total beyond the configured limit.
 - Existing open positions are not closed by the daily-loss guard.
+- Slippage and costs charged outside the closing deal can still make realized
+  loss differ from the pre-trade estimate.
 - If today's history cannot be read, trading is blocked as a safety measure.
 
 ## Order And Setup Lifecycle
@@ -75,7 +82,10 @@ distance or is on the wrong side of the current market.
 ## One Trade Per Swing
 
 - A swing is identified by the timestamps of its two confirmed anchor vertices.
-- The swing is marked as processed only after a pending order is placed.
+- The swing is marked as processed after a pending order is placed or after its
+  entry has already been crossed or its fixed price geometry is permanently
+  invalid.
+- Temporary quote and broker-distance conditions remain retryable.
 - Processed swing timestamps are stored in MT5 terminal global variables, so an
   EA or terminal restart does not place another order for the same swing.
 

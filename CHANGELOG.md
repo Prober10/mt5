@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Cap each new order's stop-loss exposure to the remaining daily closed-loss budget.
+- Record locally invalid swings as processed so they are not rejected again on every signal bar.
+- Keep broker-side order failures retryable for transient execution errors.
+
 - Added initial documentation for the MT5 Fibonacci retracement EA.
 - Captured the current XAUUSD M15 strategy specification.
 - Added the modular MQL5 Expert Advisor implementation.

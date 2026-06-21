@@ -8,6 +8,20 @@ enum SwingDirection
    SWING_DIRECTION_BEARISH
   };
 
+enum PendingOrderResult
+  {
+   PENDING_ORDER_PLACED = 0,
+   PENDING_ORDER_INVALID_SETUP,
+   PENDING_ORDER_BROKER_REJECTED
+  };
+
+enum PendingPriceValidation
+  {
+   PENDING_PRICE_VALID = 0,
+   PENDING_PRICE_PERMANENTLY_INVALID,
+   PENDING_PRICE_RETRYABLE
+  };
+
 struct SwingData
   {
    SwingDirection direction;

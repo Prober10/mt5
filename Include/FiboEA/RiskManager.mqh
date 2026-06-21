@@ -111,13 +111,34 @@ public:
       return (loss_limit > 0.0 && closed_loss >= loss_limit);
      }
 
+   bool GetRemainingDailyLossBudget(const ulong magic,
+                                    const double max_loss_percent,
+                                    double &closed_loss,
+                                    double &loss_limit,
+                                    double &remaining_budget) const
+     {
+      double start_balance = 0.0;
+      if(!GetDailyClosedLoss(magic, closed_loss, start_balance))
+        {
+         loss_limit = 0.0;
+         remaining_budget = 0.0;
+         return false;
+        }
+
+      loss_limit = start_balance * max_loss_percent / 100.0;
+      remaining_budget = MathMax(0.0, loss_limit - closed_loss);
+      return (loss_limit > 0.0);
+     }
+
    double CalculateVolume(const string symbol,
                           const SwingDirection direction,
                           const double entry,
                           const double stop_loss,
-                          const double risk_percent) const
+                          const double risk_percent,
+                          const double maximum_risk_money) const
      {
-      if(entry <= 0.0 || stop_loss <= 0.0 || entry == stop_loss || risk_percent <= 0.0)
+      if(entry <= 0.0 || stop_loss <= 0.0 || entry == stop_loss ||
+         risk_percent <= 0.0 || maximum_risk_money <= 0.0)
          return 0.0;
 
       const ENUM_ORDER_TYPE order_type = (direction == SWING_DIRECTION_BULLISH)
@@ -134,7 +155,8 @@ public:
       if(one_lot_loss <= 0.0)
          return 0.0;
 
-      const double risk_money = AccountInfoDouble(ACCOUNT_EQUITY) * risk_percent / 100.0;
+      const double configured_risk = AccountInfoDouble(ACCOUNT_EQUITY) * risk_percent / 100.0;
+      const double risk_money = MathMin(configured_risk, maximum_risk_money);
       const double raw_volume = risk_money / one_lot_loss;
       const double volume = NormalizeVolumeDown(symbol, raw_volume);
       if(volume <= 0.0)
