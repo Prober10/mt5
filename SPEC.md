@@ -67,7 +67,7 @@ Sell setup:
 - No trading-session filter for now.
 - Buy and sell setups are both allowed.
 
-## Proposed Architecture
+## Architecture
 
 Keep all configurable settings separate from trading logic.
 
