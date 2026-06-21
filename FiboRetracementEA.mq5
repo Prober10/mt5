@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -132,24 +132,19 @@ void OnTick(void)
                                    InpStopBuffer, setup))
       return;
 
-   double closed_loss = 0.0;
-   double loss_limit = 0.0;
-   double remaining_budget = 0.0;
-   if(!g_risk_manager.GetRemainingDailyLossBudget(
-         InpMagicNumber, InpMaxDailyClosedLossPercent,
-         closed_loss, loss_limit, remaining_budget))
+   const VolumeCalculationResult volume_result =
+      g_risk_manager.CalculateVolume(_Symbol, swing.direction,
+                                     setup.entry, setup.stop_loss,
+                                     InpRiskPercent, setup.volume);
+   if(volume_result == VOLUME_PERMANENTLY_UNAVAILABLE)
      {
-      Print("Setup skipped because the remaining daily risk budget could not be calculated.");
+      g_setup_tracker.MarkProcessed(swing);
+      Print("Setup marked as processed because broker minimum volume cannot fit its risk allowance.");
       return;
      }
-
-   setup.volume = g_risk_manager.CalculateVolume(_Symbol, swing.direction,
-                                                  setup.entry, setup.stop_loss,
-                                                  InpRiskPercent, remaining_budget);
-   if(setup.volume <= 0.0)
+   if(volume_result == VOLUME_RETRYABLE)
      {
-      PrintFormat("Setup skipped because a compliant volume could not fit the remaining daily risk budget of %.2f.",
-                  remaining_budget);
+      Print("Setup deferred because trade volume could not be calculated temporarily.");
       return;
      }
 

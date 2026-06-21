@@ -111,35 +111,17 @@ public:
       return (loss_limit > 0.0 && closed_loss >= loss_limit);
      }
 
-   bool GetRemainingDailyLossBudget(const ulong magic,
-                                    const double max_loss_percent,
-                                    double &closed_loss,
-                                    double &loss_limit,
-                                    double &remaining_budget) const
+   VolumeCalculationResult CalculateVolume(const string symbol,
+                                           const SwingDirection direction,
+                                           const double entry,
+                                           const double stop_loss,
+                                           const double risk_percent,
+                                           double &volume) const
      {
-      double start_balance = 0.0;
-      if(!GetDailyClosedLoss(magic, closed_loss, start_balance))
-        {
-         loss_limit = 0.0;
-         remaining_budget = 0.0;
-         return false;
-        }
-
-      loss_limit = start_balance * max_loss_percent / 100.0;
-      remaining_budget = MathMax(0.0, loss_limit - closed_loss);
-      return (loss_limit > 0.0);
-     }
-
-   double CalculateVolume(const string symbol,
-                          const SwingDirection direction,
-                          const double entry,
-                          const double stop_loss,
-                          const double risk_percent,
-                          const double maximum_risk_money) const
-     {
+      volume = 0.0;
       if(entry <= 0.0 || stop_loss <= 0.0 || entry == stop_loss ||
-         risk_percent <= 0.0 || maximum_risk_money <= 0.0)
-         return 0.0;
+         risk_percent <= 0.0)
+         return VOLUME_PERMANENTLY_UNAVAILABLE;
 
       const ENUM_ORDER_TYPE order_type = (direction == SWING_DIRECTION_BULLISH)
                                          ? ORDER_TYPE_BUY
@@ -148,28 +130,33 @@ public:
       if(!OrderCalcProfit(order_type, symbol, 1.0, entry, stop_loss, one_lot_result))
         {
          PrintFormat("Unable to calculate trade risk for %s. Error: %d", symbol, GetLastError());
-         return 0.0;
+         return VOLUME_RETRYABLE;
         }
 
       const double one_lot_loss = MathAbs(one_lot_result);
       if(one_lot_loss <= 0.0)
-         return 0.0;
+         return VOLUME_RETRYABLE;
 
-      const double configured_risk = AccountInfoDouble(ACCOUNT_EQUITY) * risk_percent / 100.0;
-      const double risk_money = MathMin(configured_risk, maximum_risk_money);
+      const double risk_money = AccountInfoDouble(ACCOUNT_EQUITY) * risk_percent / 100.0;
       const double raw_volume = risk_money / one_lot_loss;
-      const double volume = NormalizeVolumeDown(symbol, raw_volume);
+      volume = NormalizeVolumeDown(symbol, raw_volume);
       if(volume <= 0.0)
-         return 0.0;
+         return VOLUME_PERMANENTLY_UNAVAILABLE;
 
       double normalized_loss = 0.0;
       if(!OrderCalcProfit(order_type, symbol, volume, entry, stop_loss, normalized_loss))
-         return 0.0;
+        {
+         volume = 0.0;
+         return VOLUME_RETRYABLE;
+        }
 
       if(MathAbs(normalized_loss) > risk_money + 0.01)
-         return 0.0;
+        {
+         volume = 0.0;
+         return VOLUME_PERMANENTLY_UNAVAILABLE;
+        }
 
-      return volume;
+      return VOLUME_CALCULATED;
      }
   };
 

@@ -2,9 +2,11 @@
 
 ## Unreleased
 
-- Cap each new order's stop-loss exposure to the remaining daily closed-loss budget.
 - Record locally invalid swings as processed so they are not rejected again on every signal bar.
+- Record swings that cannot fit the broker's minimum volume as processed once.
 - Keep broker-side order failures retryable for transient execution errors.
+- Removed the experimental remaining-daily-budget volume cap after its comparison
+  test reduced return and increased total drawdown.
 
 - Added initial documentation for the MT5 Fibonacci retracement EA.
 - Captured the current XAUUSD M15 strategy specification.

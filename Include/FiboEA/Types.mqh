@@ -22,6 +22,13 @@ enum PendingPriceValidation
    PENDING_PRICE_RETRYABLE
   };
 
+enum VolumeCalculationResult
+  {
+   VOLUME_CALCULATED = 0,
+   VOLUME_PERMANENTLY_UNAVAILABLE,
+   VOLUME_RETRYABLE
+  };
+
 struct SwingData
   {
    SwingDirection direction;
