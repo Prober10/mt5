@@ -34,3 +34,22 @@ It reduced return, profit factor, and recovery while increasing total drawdown.
 Do not promote version 1.01. Retain the setup-lifecycle improvements and remove
 the remaining-daily-budget volume cap. Funded-account protection will be designed
 and tested separately from general setup reliability.
+
+## Version 1.02 Follow-up
+
+Version 1.02 removed the risk cap but continued marking locally rejected setups
+as processed. Its automated comparison produced USD 164.77 net profit, a 1.05
+profit factor, 135 trades, 7.19% balance drawdown, and 7.51% equity drawdown.
+Suppressing those retries changed trade selection and was also rejected.
+
+Version 1.03 retains retries and suppresses only duplicate diagnostic messages.
+
+## Version 1.03 Acceptance
+
+The automated comparison exactly reproduced version 1.00: USD 584.26 net
+profit, 1.15 profit factor, 180 trades, 5.19% balance drawdown, and 5.58%
+equity drawdown. All win/loss and direction counts also matched.
+
+Repeated local diagnostics fell from 1,277 invalid-price messages and 100
+volume messages to 101 and 5 respectively. Version 1.03 is accepted as a
+behavior-preserving reliability improvement.

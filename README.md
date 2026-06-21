@@ -23,6 +23,14 @@ the behavior implemented by the current code.
 
 Backtest findings are stored as dated notes under [`docs/backtests`](docs/backtests).
 
+## Automated Backtest
+
+With MT5 closed, run
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\run-backtest.ps1`.
+The runner uses the checked-in
+XAUUSD M15 real-tick configuration, exports a timestamped HTML report under
+`Documents\MT5\automated-reports`, and closes MT5 when testing completes.
+
 ## Build
 
 Open `FiboRetracementEA.mq5` in MetaEditor and compile it. Build output (`*.ex5`)

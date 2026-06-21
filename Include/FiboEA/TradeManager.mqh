@@ -118,17 +118,11 @@ public:
                                         const string comment)
      {
       if(!setup.valid || setup.volume <= 0.0)
-        {
-         Print("Pending order rejected because the setup or volume is invalid.");
          return PENDING_ORDER_INVALID_SETUP;
-        }
 
       const PendingPriceValidation price_validation = ValidatePendingPrices(symbol, setup);
       if(price_validation == PENDING_PRICE_PERMANENTLY_INVALID)
-        {
-         Print("Pending order rejected because its price geometry is no longer valid.");
          return PENDING_ORDER_INVALID_SETUP;
-        }
       if(price_validation == PENDING_PRICE_RETRYABLE)
         {
          Print("Pending order deferred because current quote or stop-distance conditions are temporary.");

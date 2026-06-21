@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.02 of
+This document describes the behavior implemented by version 1.03 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -75,11 +75,10 @@ distance or is on the wrong side of the current market.
 ## One Trade Per Swing
 
 - A swing is identified by the timestamps of its two confirmed anchor vertices.
-- The swing is marked as processed after a pending order is placed or after its
-  entry has already been crossed or its fixed price geometry is permanently
-  invalid.
-- A swing is also marked as processed when its stop distance makes the broker's
-  minimum volume exceed the configured risk allowance.
+- The swing is marked as processed only after a pending order is placed.
+- Invalid prices and unavailable compliant volumes are re-evaluated on later
+  signal bars, preserving the original strategy behavior.
+- Repeated local rejection diagnostics are logged only once per swing and reason.
 - Temporary quote and broker-distance conditions remain retryable.
 - Processed swing timestamps are stored in MT5 terminal global variables, so an
   EA or terminal restart does not place another order for the same swing.

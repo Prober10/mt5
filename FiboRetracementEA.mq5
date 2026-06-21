@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.02"
+#property version   "1.03"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -138,8 +138,8 @@ void OnTick(void)
                                      InpRiskPercent, setup.volume);
    if(volume_result == VOLUME_PERMANENTLY_UNAVAILABLE)
      {
-      g_setup_tracker.MarkProcessed(swing);
-      Print("Setup marked as processed because broker minimum volume cannot fit its risk allowance.");
+      if(g_setup_tracker.ShouldLogVolumeRejection(swing))
+         Print("Setup volume does not fit the configured risk allowance; retries will be silent for this swing.");
       return;
      }
    if(volume_result == VOLUME_RETRYABLE)
@@ -152,8 +152,8 @@ void OnTick(void)
       g_trade_manager.PlacePendingOrder(_Symbol, setup, InpOrderComment);
    if(order_result == PENDING_ORDER_INVALID_SETUP)
      {
-      g_setup_tracker.MarkProcessed(swing);
-      Print("Setup marked as processed after permanent local validation rejection.");
+      if(g_setup_tracker.ShouldLogPriceRejection(swing))
+         Print("Setup price is currently invalid; retries will be silent for this swing.");
       return;
      }
 
