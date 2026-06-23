@@ -22,6 +22,8 @@ See [SPEC.md](SPEC.md) for the strategy specification and
 the behavior implemented by the current code.
 
 Backtest findings are stored as dated notes under [`docs/backtests`](docs/backtests).
+Strategy experiments and decisions are tracked in
+[`docs/STRATEGY_EXPERIMENTS.md`](docs/STRATEGY_EXPERIMENTS.md).
 
 ## Automated Backtest
 
