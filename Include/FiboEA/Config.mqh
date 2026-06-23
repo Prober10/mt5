@@ -11,6 +11,11 @@ input double          InpFibonacciEntry = 0.79;
 input bool            InpAllowBuy = true;
 input bool            InpAllowSell = true;
 
+input group "Session Filters"
+input bool InpUseBuySessionFilter = false;
+input int  InpBuySessionStartHour = 13;
+input int  InpBuySessionEndHour = 23;
+
 input group "Protection"
 input double InpStopBuffer = 0.10;
 input double InpRiskPercent = 0.50;

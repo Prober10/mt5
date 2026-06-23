@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.04 of
+This document describes the behavior implemented by version 1.05 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -73,6 +73,19 @@ distance or is on the wrong side of the current market.
   cancelled and a setup is calculated from the new swing.
 - An open position is never replaced because a newer swing appears.
 - Both buy and sell setups are enabled by default and can be disabled separately.
+
+## Buy Session Filter
+
+- `InpUseBuySessionFilter` defaults to `false`.
+- When enabled, bullish setups are considered only during the configured broker
+  server-hour window.
+- The default candidate window is `13` through `23`, inclusive.
+- If the start hour is greater than the end hour, the session is treated as a
+  midnight-crossing window.
+- The filter controls setup placement time only. A buy limit placed during the
+  allowed window can still fill later outside that window unless a separate
+  order-expiration or cancellation rule is added.
+- Sell setups are not affected by this filter.
 
 ## One Trade Per Swing
 

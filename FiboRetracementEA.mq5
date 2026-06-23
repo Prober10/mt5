@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.04"
+#property version   "1.05"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -29,6 +29,8 @@ bool InputsAreValid(void)
            InpZigZagBackstep > 0 &&
            InpZigZagLookbackBars >= 100 &&
            InpFibonacciEntry > 0.0 && InpFibonacciEntry < 1.0 &&
+           InpBuySessionStartHour >= 0 && InpBuySessionStartHour <= 23 &&
+           InpBuySessionEndHour >= 0 && InpBuySessionEndHour <= 23 &&
            InpStopBuffer >= 0.0 &&
            InpRiskPercent > 0.0 &&
            InpMaxDailyClosedLossPercent > 0.0 &&
@@ -72,6 +74,23 @@ bool DailyTradingAllowed(void)
      }
 
    return true;
+  }
+
+bool BuySessionAllowsCurrentTime(void)
+  {
+   if(!InpUseBuySessionFilter)
+      return true;
+
+   datetime now = TimeTradeServer();
+   if(now == 0)
+      now = TimeCurrent();
+
+   MqlDateTime parts;
+   TimeToStruct(now, parts);
+   if(InpBuySessionStartHour <= InpBuySessionEndHour)
+      return (parts.hour >= InpBuySessionStartHour && parts.hour <= InpBuySessionEndHour);
+
+   return (parts.hour >= InpBuySessionStartHour || parts.hour <= InpBuySessionEndHour);
   }
 
 int OnInit(void)
@@ -141,6 +160,14 @@ void OnTick(void)
      }
    else if(already_processed)
       return;
+
+   if(swing.direction == SWING_DIRECTION_BULLISH && !BuySessionAllowsCurrentTime())
+     {
+      TradeSetup blocked_setup;
+      ResetSetup(blocked_setup);
+      g_diagnostics.LogSetupRejected(_Symbol, swing, blocked_setup, "buy_session_blocked");
+      return;
+     }
 
    TradeSetup setup;
    if(!g_fibo_calculator.Calculate(_Symbol, swing, InpFibonacciEntry,

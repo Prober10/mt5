@@ -103,9 +103,10 @@ window. It should:
 
 ### EXP-005: Restrict Buy Trades By Session
 
-- Status: `Idea`
+- Status: `Discovery`
 - Summary: Keep sell behavior unchanged, but allow buys only during stronger
-  historical buy sessions, likely `13-23` broker time as the first candidate.
+  historical buy sessions. The first tested candidate restricts buy setup
+  placement to `13-23` broker time.
 - Rationale:
   - Diagnostics showed buy trades from `00-12` broker time were the largest
     weakness.
@@ -113,12 +114,24 @@ window. It should:
 - Discovery what-if from filled trades only:
   - Baseline: 180 trades, +585.23, PF 1.15
   - All sells + buys only `13-23`: 125 trades, +1029.19, PF 1.41
+- Discovery test:
+  - Code version: `1.05`
+  - Report: `Documents\MT5\automated-reports\FiboRetracementEA-XAUUSD-M15-20260623-215902.htm`
+  - Net profit: 1,068.82
+  - Profit factor: 1.35
+  - Trades: 147
+  - Equity DD max: 297.11 / 2.77%
+  - Buy trades: 60, +251.95, PF 1.20
+  - Sell trades: 87, +826.53, PF 1.48
+  - All tested months were net positive in the discovery window.
+- Notes:
+  - The rule filters buy setup placement time only.
+  - Pending buy limits placed during the allowed session can still fill outside
+    the session.
 - Required next test:
-  - Code the filter.
-  - Rerun the discovery window.
-  - If promising, validate on unseen windows before accepting.
+  - Validate on unseen windows before accepting.
 - Acceptance status:
-  - Not accepted yet. This is only a hypothesis.
+  - Not accepted yet. Discovery-window improvement is promising but not proof.
 
 ### EXP-006: Minimum ATR Filter
 
