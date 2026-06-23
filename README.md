@@ -34,6 +34,16 @@ XAUUSD M15 real-tick configuration, exports a timestamped HTML report under
 `Documents\MT5\automated-reports`, copies the matching diagnostics CSV when
 enabled, and closes MT5 when testing completes.
 
+Optional overrides are available for validation runs:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\run-backtest.ps1 `
+  -FromDate '2026.01.01' `
+  -ToDate '2026.02.28' `
+  -UseBuySessionFilter true `
+  -ReportLabel 'exp005-20260101-20260228'
+```
+
 ## Diagnostics
 
 Diagnostics are disabled by default for normal/live use. The automated backtest

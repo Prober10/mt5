@@ -103,7 +103,7 @@ window. It should:
 
 ### EXP-005: Restrict Buy Trades By Session
 
-- Status: `Discovery`
+- Status: `Validation`
 - Summary: Keep sell behavior unchanged, but allow buys only during stronger
   historical buy sessions. The first tested candidate restricts buy setup
   placement to `13-23` broker time.
@@ -129,9 +129,16 @@ window. It should:
   - Pending buy limits placed during the allowed session can still fill outside
     the session.
 - Required next test:
-  - Validate on unseen windows before accepting.
+  - Continue validation on the longer 2025 windows before accepting.
+- Validation result: `2026-01-01` to `2026-02-28`
+  - Baseline: -108.61, PF 0.95, 103 trades, equity DD 486.10 / 4.85%
+  - EXP-005: +55.88, PF 1.03, 88 trades, equity DD 420.96 / 4.11%
+  - Buy side improved from -18.31 to +175.55.
+  - Sell side was weak in both versions.
+  - Directionally positive, but not strong enough for acceptance.
 - Acceptance status:
-  - Not accepted yet. Discovery-window improvement is promising but not proof.
+  - Not accepted yet. One unseen validation window is encouraging, but the rule
+    still needs longer 2025 validation.
 
 ### EXP-006: Minimum ATR Filter
 

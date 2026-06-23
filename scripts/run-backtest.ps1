@@ -3,6 +3,10 @@ param(
     [string]$TerminalPath = 'C:\Program Files\MetaTrader 5\terminal64.exe',
     [string]$TerminalDataPath = "$env:APPDATA\MetaQuotes\Terminal\D0E8209F77C8CF37AD8BF550E51FF075",
     [string]$ReportDirectory = "$env:USERPROFILE\Documents\MT5\automated-reports",
+    [string]$FromDate,
+    [string]$ToDate,
+    [string]$UseBuySessionFilter,
+    [string]$ReportLabel,
     [int]$TimeoutSeconds = 900
 )
 
@@ -25,7 +29,11 @@ if ($runningTerminal) {
 
 New-Item -ItemType Directory -Path $ReportDirectory -Force | Out-Null
 $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$reportBaseName = "FiboRetracementEA-XAUUSD-M15-$timestamp"
+$safeReportLabel = ''
+if (-not [string]::IsNullOrWhiteSpace($ReportLabel)) {
+    $safeReportLabel = '-' + ($ReportLabel -replace '[^A-Za-z0-9_-]', '-')
+}
+$reportBaseName = "FiboRetracementEA-XAUUSD-M15$safeReportLabel-$timestamp"
 $relativeReportDirectory = 'backtest-reports'
 $relativeReportPath = "$relativeReportDirectory\$reportBaseName.htm"
 $stagingReportDirectory = Join-Path $TerminalDataPath $relativeReportDirectory
@@ -40,6 +48,20 @@ New-Item -ItemType Directory -Path $stagingReportDirectory -Force | Out-Null
 Remove-Item -LiteralPath $diagnosticsPath -Force -ErrorAction SilentlyContinue
 $config = Get-Content -LiteralPath $templatePath -Raw
 $config = $config.Replace('{{REPORT_PATH}}', $relativeReportPath)
+if (-not [string]::IsNullOrWhiteSpace($FromDate)) {
+    $config = $config -replace '(?m)^FromDate=.*$', "FromDate=$FromDate"
+}
+if (-not [string]::IsNullOrWhiteSpace($ToDate)) {
+    $config = $config -replace '(?m)^ToDate=.*$', "ToDate=$ToDate"
+}
+if (-not [string]::IsNullOrWhiteSpace($UseBuySessionFilter)) {
+    $filterText = switch -Regex ($UseBuySessionFilter.Trim()) {
+        '^(1|true|yes)$' { 'true'; break }
+        '^(0|false|no)$' { 'false'; break }
+        default { throw "UseBuySessionFilter must be true/false, yes/no, or 1/0." }
+    }
+    $config = $config -replace '(?m)^InpUseBuySessionFilter=.*$', "InpUseBuySessionFilter=$filterText||false||0||true||N"
+}
 [IO.File]::WriteAllText($configPath, $config, [Text.Encoding]::Unicode)
 
 try {
