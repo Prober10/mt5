@@ -21,4 +21,8 @@ input ulong InpMagicNumber = 790015;
 input int   InpDeviationPoints = 20;
 input string InpOrderComment = "Fibo 79 EA";
 
+input group "Diagnostics"
+input bool   InpEnableDiagnostics = false;
+input string InpDiagnosticsFileName = "FiboEA\\diagnostics.csv";
+
 #endif

@@ -32,8 +32,12 @@ $stagingReportDirectory = Join-Path $TerminalDataPath $relativeReportDirectory
 $stagingReportPath = Join-Path $TerminalDataPath $relativeReportPath
 $reportPath = Join-Path $ReportDirectory "$reportBaseName.htm"
 $configPath = Join-Path $env:TEMP "FiboRetracementEA-backtest-$timestamp.ini"
+$commonFilesPath = Join-Path $env:APPDATA 'MetaQuotes\Terminal\Common\Files'
+$diagnosticsPath = Join-Path $commonFilesPath 'FiboEA\diagnostics.csv'
+$diagnosticsReportPath = Join-Path $ReportDirectory "$reportBaseName-diagnostics.csv"
 
 New-Item -ItemType Directory -Path $stagingReportDirectory -Force | Out-Null
+Remove-Item -LiteralPath $diagnosticsPath -Force -ErrorAction SilentlyContinue
 $config = Get-Content -LiteralPath $templatePath -Raw
 $config = $config.Replace('{{REPORT_PATH}}', $relativeReportPath)
 [IO.File]::WriteAllText($configPath, $config, [Text.Encoding]::Unicode)
@@ -53,6 +57,10 @@ try {
     Get-ChildItem -LiteralPath $stagingReportDirectory -File |
         Where-Object { $_.BaseName -like "$reportBaseName*" } |
         Copy-Item -Destination $ReportDirectory -Force
+    if (Test-Path -LiteralPath $diagnosticsPath) {
+        Copy-Item -LiteralPath $diagnosticsPath -Destination $diagnosticsReportPath -Force
+        [Console]::WriteLine("Diagnostics: $diagnosticsReportPath")
+    }
     $report = Get-Item -LiteralPath $reportPath
     [Console]::WriteLine("Report: $($report.FullName)")
 }

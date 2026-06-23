@@ -29,7 +29,16 @@ With MT5 closed, run
 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\run-backtest.ps1`.
 The runner uses the checked-in
 XAUUSD M15 real-tick configuration, exports a timestamped HTML report under
-`Documents\MT5\automated-reports`, and closes MT5 when testing completes.
+`Documents\MT5\automated-reports`, copies the matching diagnostics CSV when
+enabled, and closes MT5 when testing completes.
+
+## Diagnostics
+
+Diagnostics are disabled by default for normal/live use. The automated backtest
+configuration enables them and writes `FiboEA\diagnostics.csv` in the MT5 common
+files area, then the runner copies it beside the HTML report using the same
+timestamped base name. The CSV records setup calculation/rejection/placement
+events, swing/Fibonacci prices, spread, ATR/slope context, and trade deals.
 
 ## Build
 

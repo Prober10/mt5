@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.03 of
+This document describes the behavior implemented by version 1.04 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -13,6 +13,8 @@ remains the source for the intended strategy rules.
 - Strategy evaluation runs once at the start of each new signal-timeframe bar.
 - Daily-loss protection is checked on every tick.
 - Trades and orders are isolated using the configured magic number.
+- Diagnostic CSV export is available as an opt-in testing aid and is disabled by
+  default.
 
 ## Swing Detection
 
@@ -93,6 +95,20 @@ distance or is on the wrong side of the current market.
 - The EA has compiled successfully, but strategy behavior still needs validation
   in the MT5 Strategy Tester using representative broker XAUUSD data.
 
+## Diagnostics
+
+- `InpEnableDiagnostics` defaults to `false`; diagnostic export only runs in the
+  Strategy Tester when this input is enabled.
+- `InpDiagnosticsFileName` defaults to `FiboEA\diagnostics.csv` in the MT5 common
+  files area.
+- The CSV records setup calculation, rejection, placement, and deal events.
+- Setup rows include direction, swing anchors, Fibonacci entry/SL/TP, volume,
+  risk/reward distance, setup age, spread, equity, ATR(14), and a 20-bar slope
+  snapshot.
+- Deal rows include deal/order/position identifiers, entry direction, realized
+  profit, commission, swap, fee, and MT5 deal comments.
+- Diagnostics do not change strategy decisions or order placement behavior.
+
 ## Module Ownership
 
 - `FiboRetracementEA.mq5`: lifecycle and module coordination.
@@ -103,3 +119,4 @@ distance or is on the wrong side of the current market.
 - `RiskManager.mqh`: volume sizing and broker-day loss protection.
 - `TradeManager.mqh`: broker validation and pending-order operations.
 - `SetupTracker.mqh`: persistent one-trade-per-swing state.
+- `Diagnostics.mqh`: tester-only CSV export for setup and trade analysis.

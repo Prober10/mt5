@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.03"
+#property version   "1.04"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -9,12 +9,14 @@
 #include "Include/FiboEA/RiskManager.mqh"
 #include "Include/FiboEA/TradeManager.mqh"
 #include "Include/FiboEA/SetupTracker.mqh"
+#include "Include/FiboEA/Diagnostics.mqh"
 
 CZigZagSwingDetector g_swing_detector;
 CFiboCalculator      g_fibo_calculator;
 CRiskManager         g_risk_manager;
 CTradeManager        g_trade_manager;
 CSetupTracker        g_setup_tracker;
+CDiagnostics         g_diagnostics;
 
 datetime g_last_signal_bar = 0;
 datetime g_current_day = 0;
@@ -90,13 +92,26 @@ int OnInit(void)
 
    g_trade_manager.Initialize(InpMagicNumber, InpDeviationPoints);
    g_setup_tracker.Initialize(_Symbol, InpMagicNumber);
+   if(!g_diagnostics.Initialize(InpEnableDiagnostics, InpDiagnosticsFileName,
+                                _Symbol, InpSignalTimeframe))
+      return INIT_FAILED;
+
    g_current_day = g_risk_manager.CurrentBrokerDayStart();
    return INIT_SUCCEEDED;
   }
 
 void OnDeinit(const int reason)
   {
+   g_diagnostics.Deinitialize();
    g_swing_detector.Release();
+  }
+
+void OnTradeTransaction(const MqlTradeTransaction &transaction,
+                        const MqlTradeRequest &request,
+                        const MqlTradeResult &result)
+  {
+   if(transaction.type == TRADE_TRANSACTION_DEAL_ADD)
+      g_diagnostics.LogTradeDeal(transaction.deal, InpMagicNumber);
   }
 
 void OnTick(void)
@@ -130,7 +145,12 @@ void OnTick(void)
    TradeSetup setup;
    if(!g_fibo_calculator.Calculate(_Symbol, swing, InpFibonacciEntry,
                                    InpStopBuffer, setup))
+     {
+      g_diagnostics.LogSetupRejected(_Symbol, swing, setup, "fibo_calculation_failed");
       return;
+     }
+
+   g_diagnostics.LogSetupCalculated(_Symbol, setup);
 
    const VolumeCalculationResult volume_result =
       g_risk_manager.CalculateVolume(_Symbol, swing.direction,
@@ -138,12 +158,14 @@ void OnTick(void)
                                      InpRiskPercent, setup.volume);
    if(volume_result == VOLUME_PERMANENTLY_UNAVAILABLE)
      {
+      g_diagnostics.LogSetupRejected(_Symbol, swing, setup, "volume_permanently_unavailable");
       if(g_setup_tracker.ShouldLogVolumeRejection(swing))
          Print("Setup volume does not fit the configured risk allowance; retries will be silent for this swing.");
       return;
      }
    if(volume_result == VOLUME_RETRYABLE)
      {
+      g_diagnostics.LogSetupRejected(_Symbol, swing, setup, "volume_retryable");
       Print("Setup deferred because trade volume could not be calculated temporarily.");
       return;
      }
@@ -152,14 +174,21 @@ void OnTick(void)
       g_trade_manager.PlacePendingOrder(_Symbol, setup, InpOrderComment);
    if(order_result == PENDING_ORDER_INVALID_SETUP)
      {
+      g_diagnostics.LogSetupRejected(_Symbol, swing, setup, "pending_price_invalid");
       if(g_setup_tracker.ShouldLogPriceRejection(swing))
          Print("Setup price is currently invalid; retries will be silent for this swing.");
+      return;
+     }
+   if(order_result == PENDING_ORDER_BROKER_REJECTED)
+     {
+      g_diagnostics.LogSetupRejected(_Symbol, swing, setup, "pending_order_broker_rejected");
       return;
      }
 
    if(order_result == PENDING_ORDER_PLACED)
      {
       g_setup_tracker.MarkProcessed(swing);
+      g_diagnostics.LogSetupPlaced(_Symbol, setup);
       PrintFormat("Placed %s limit: volume %.2f, entry %.*f, SL %.*f, TP %.*f",
                   swing.direction == SWING_DIRECTION_BULLISH ? "buy" : "sell",
                   setup.volume, _Digits, setup.entry, _Digits, setup.stop_loss,
