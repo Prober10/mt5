@@ -6,6 +6,9 @@ param(
     [string]$FromDate,
     [string]$ToDate,
     [string]$UseBuySessionFilter,
+    [string]$UseSwingBandFilter,
+    [string]$AvoidSwingMinPoints,
+    [string]$AvoidSwingMaxPoints,
     [string]$PendingOrderExpirationHours,
     [string]$ReportLabel,
     [int]$TimeoutSeconds = 900
@@ -62,6 +65,36 @@ if (-not [string]::IsNullOrWhiteSpace($UseBuySessionFilter)) {
         default { throw "UseBuySessionFilter must be true/false, yes/no, or 1/0." }
     }
     $config = $config -replace '(?m)^InpUseBuySessionFilter=.*$', "InpUseBuySessionFilter=$filterText||false||0||true||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($UseSwingBandFilter)) {
+    $filterText = switch -Regex ($UseSwingBandFilter.Trim()) {
+        '^(1|true|yes)$' { 'true'; break }
+        '^(0|false|no)$' { 'false'; break }
+        default { throw "UseSwingBandFilter must be true/false, yes/no, or 1/0." }
+    }
+    $config = $config -replace '(?m)^InpUseSwingBandFilter=.*$', "InpUseSwingBandFilter=$filterText||false||0||true||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($AvoidSwingMinPoints)) {
+    [double]$minPoints = 0.0
+    if (-not [double]::TryParse($AvoidSwingMinPoints, [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$minPoints)) {
+        throw "AvoidSwingMinPoints must be a number."
+    }
+    if ($minPoints -lt 0.0) {
+        throw "AvoidSwingMinPoints must be greater than or equal to zero."
+    }
+    $minPointsText = $minPoints.ToString('0.########', [Globalization.CultureInfo]::InvariantCulture)
+    $config = $config -replace '(?m)^InpAvoidSwingMinPoints=.*$', "InpAvoidSwingMinPoints=$minPointsText||2500.0||250.000000||25000.000000||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($AvoidSwingMaxPoints)) {
+    [double]$maxPoints = 0.0
+    if (-not [double]::TryParse($AvoidSwingMaxPoints, [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$maxPoints)) {
+        throw "AvoidSwingMaxPoints must be a number."
+    }
+    if ($maxPoints -lt 0.0) {
+        throw "AvoidSwingMaxPoints must be greater than or equal to zero."
+    }
+    $maxPointsText = $maxPoints.ToString('0.########', [Globalization.CultureInfo]::InvariantCulture)
+    $config = $config -replace '(?m)^InpAvoidSwingMaxPoints=.*$', "InpAvoidSwingMaxPoints=$maxPointsText||5000.0||500.000000||50000.000000||N"
 }
 if (-not [string]::IsNullOrWhiteSpace($PendingOrderExpirationHours)) {
     [double]$expirationHours = 0.0

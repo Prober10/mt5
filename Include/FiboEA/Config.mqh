@@ -16,6 +16,11 @@ input bool InpUseBuySessionFilter = false;
 input int  InpBuySessionStartHour = 13;
 input int  InpBuySessionEndHour = 23;
 
+input group "Swing Filters"
+input bool   InpUseSwingBandFilter = false;
+input double InpAvoidSwingMinPoints = 2500.0;
+input double InpAvoidSwingMaxPoints = 5000.0;
+
 input group "Protection"
 input double InpStopBuffer = 0.10;
 input double InpRiskPercent = 0.50;

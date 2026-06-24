@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.07"
+#property version   "1.08"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -31,6 +31,8 @@ bool InputsAreValid(void)
            InpFibonacciEntry > 0.0 && InpFibonacciEntry < 1.0 &&
            InpBuySessionStartHour >= 0 && InpBuySessionStartHour <= 23 &&
            InpBuySessionEndHour >= 0 && InpBuySessionEndHour <= 23 &&
+           InpAvoidSwingMinPoints >= 0.0 &&
+           InpAvoidSwingMaxPoints >= InpAvoidSwingMinPoints &&
            InpStopBuffer >= 0.0 &&
            InpRiskPercent > 0.0 &&
            InpMaxDailyClosedLossPercent > 0.0 &&
@@ -96,6 +98,25 @@ bool BuySessionAllowsCurrentTime(void)
       return (parts.hour >= InpBuySessionStartHour && parts.hour <= InpBuySessionEndHour);
 
    return (parts.hour >= InpBuySessionStartHour || parts.hour <= InpBuySessionEndHour);
+  }
+
+double SwingSizePoints(const SwingData &swing)
+  {
+   const double point = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
+   if(point <= 0.0)
+      return 0.0;
+
+   return MathAbs(swing.end_price - swing.start_price) / point;
+  }
+
+bool SwingBandAllowsSetup(const SwingData &swing)
+  {
+   if(!InpUseSwingBandFilter)
+      return true;
+
+   const double swing_points = SwingSizePoints(swing);
+   return (swing_points < InpAvoidSwingMinPoints ||
+           swing_points > InpAvoidSwingMaxPoints);
   }
 
 int OnInit(void)
@@ -171,6 +192,14 @@ void OnTick(void)
       TradeSetup blocked_setup;
       ResetSetup(blocked_setup);
       g_diagnostics.LogSetupRejected(_Symbol, swing, blocked_setup, "buy_session_blocked");
+      return;
+     }
+
+   if(!SwingBandAllowsSetup(swing))
+     {
+      TradeSetup blocked_setup;
+      ResetSetup(blocked_setup);
+      g_diagnostics.LogSetupRejected(_Symbol, swing, blocked_setup, "swing_band_blocked");
       return;
      }
 

@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.07 of
+This document describes the behavior implemented by version 1.08 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -98,6 +98,16 @@ distance or is on the wrong side of the current market.
   order-expiration or cancellation rule is added.
 - Sell setups are not affected by this filter.
 
+## Swing Band Filter
+
+- `InpUseSwingBandFilter` defaults to `false`.
+- When enabled, setups are skipped if the confirmed ZigZag impulse swing size is
+  between `InpAvoidSwingMinPoints` and `InpAvoidSwingMaxPoints`, inclusive.
+- The default candidate blocked band is `2500` to `5000` points.
+- On XAUUSD quoted with 2 decimals, that roughly means swings from `$25` to
+  `$50`.
+- Both buy and sell setups are affected by this filter.
+
 ## One Trade Per Swing
 
 - A swing is identified by the timestamps of its two confirmed anchor vertices.
@@ -111,11 +121,12 @@ distance or is on the wrong side of the current market.
 
 ## Current Boundaries
 
-- There is no minimum impulse-size filter.
-- There is no trading-session or news filter.
+- There is an optional swing-band filter, disabled by default.
+- There is no news filter.
 - There is no spread filter.
 - There is no trailing stop, break-even rule, or partial close.
-- Pending orders have no time-based expiration.
+- Pending orders use no time-based expiration by default, but optional
+  expiration is available.
 - The EA has compiled successfully, but strategy behavior still needs validation
   in the MT5 Strategy Tester using representative broker XAUUSD data.
 

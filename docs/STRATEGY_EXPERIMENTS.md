@@ -245,7 +245,8 @@ window. It should:
 
 ### EXP-010: Avoid Mid-Sized Confirmed Swings
 
-- Status: `Idea`
+- Status: `Accepted as current candidate, not production-ready`
+- Code version: `1.08`
 - Summary: Skip setups where confirmed swing size is between `2500` and `5000`
   points.
 - Rationale:
@@ -258,8 +259,27 @@ window. It should:
   - 2026 Mar-Jun: 76 trades, -179.75, PF 0.91
   - 2026 Jan-Feb: 39 trades, -389.09, PF 0.64
   - 2025 H2: 88 trades, -382.02, PF 0.83
-- Required next test:
-  - Test against the current baseline by itself.
-  - Do not stack with EXP-005 or EXP-009 until it proves useful independently.
+- Test configuration:
+  - `InpUseSwingBandFilter=true`
+  - `InpAvoidSwingMinPoints=2500`
+  - `InpAvoidSwingMaxPoints=5000`
+  - `InpUseBuySessionFilter=false`
+  - `InpPendingOrderExpirationHours=0`
+- Discovery result: `2026-03-01` to `2026-06-19`
+  - Baseline: +546.43, PF 1.14, 180 trades, equity DD 606.10 / 5.55%
+  - EXP-010: +622.53, PF 1.31, 106 trades, equity DD 279.45 / 2.60%
+- Validation result: `2026-01-01` to `2026-02-28`
+  - Baseline: -98.46, PF 0.96, 103 trades, equity DD 475.95 / 4.75%
+  - EXP-010: +377.54, PF 1.31, 64 trades, equity DD 307.26 / 3.04%
+- Validation result: `2025-07-01` to `2025-12-31`
+  - Baseline: +643.41, PF 1.12, 290 trades, equity DD 378.90 / 3.72%
+  - EXP-010: +992.61, PF 1.32, 203 trades, equity DD 271.94 / 2.65%
+- Validation result: `2025-01-01` to `2025-06-30`
+  - Baseline: -772.65, PF 0.87, 300 trades, equity DD 1,200.02 / 11.80%
+  - EXP-010: -421.89, PF 0.89, 223 trades, equity DD 775.03 / 7.66%
+  - EXP-010 reduced the loss and drawdown, but the window remained unsuitable
+    for funded-account deployment.
 - Acceptance status:
-  - Not accepted yet. This is the next candidate experiment.
+  - Accepted as the current best candidate strategy layer.
+  - Keep configurable. Do not make it the production default until the 2025 H1
+    weakness is understood and reduced.
