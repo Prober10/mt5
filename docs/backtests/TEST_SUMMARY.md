@@ -12,6 +12,8 @@ pending orders.
 | v1.02 setup rejection marking | Rejected | 164.77 | 1.05 | 135 | 810.30 / 7.51% | 0.0514 | 0.0521 | 0.0506 | Changed behavior negatively |
 | v1.04 diagnostics | Accepted instrumentation | 584.26 | 1.15 | 180 | 609.67 / 5.58% | 0.0614 | 0.0605 | 0.0624 | Same behavior as baseline; diagnostics added |
 | EXP-005 buy setup session filter | Discovery | 1,068.82 | 1.35 | 147 | 297.11 / 2.77% | 0.0607 | 0.0548 | 0.0647 | Promising on discovery window |
+| v1.06 baseline with lot/margin guard | Current baseline | 546.43 | 1.14 | 180 | 606.10 / 5.55% | 0.0578 | 0.0576 | 0.0580 | Max lot capped at 0.10 |
+| v1.06 EXP-005 with lot/margin guard | Current discovery | 1,070.29 | 1.37 | 147 | 280.21 / 2.61% | 0.0572 | 0.0538 | 0.0595 | Current best discovery result |
 
 ## Validation Window: 2026-01-01 to 2026-02-28
 
@@ -19,6 +21,8 @@ pending orders.
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | Baseline | Validation baseline | -108.61 | 0.95 | 103 | 486.10 / 4.85% | 0.0547 | 0.0531 | 0.0559 | Slightly losing unseen window |
 | EXP-005 buy setup session filter | Validation | 55.88 | 1.03 | 88 | 420.96 / 4.11% | 0.0545 | 0.0483 | 0.0578 | Improved, but only modestly |
+| v1.06 baseline with lot/margin guard | Current validation baseline | -98.46 | 0.96 | 103 | 475.95 / 4.75% | 0.0525 | 0.0511 | 0.0536 | Max lot capped at 0.10 |
+| v1.06 EXP-005 with lot/margin guard | Current validation | 50.06 | 1.03 | 88 | 420.96 / 4.11% | 0.0518 | 0.0457 | 0.0550 | Still improves Jan-Feb modestly |
 
 ## Side Split Highlights
 
@@ -32,6 +36,16 @@ Discovery EXP-005:
 - Buy trades: 60, +251.95, PF 1.20
 - Sell trades: 87, +826.53, PF 1.48
 
+Discovery v1.06 baseline:
+
+- Buy trades: 95, -330.25, PF 0.86
+- Sell trades: 85, +877.65, PF 1.57
+
+Discovery v1.06 EXP-005:
+
+- Buy trades: 60, +234.54, PF 1.18
+- Sell trades: 87, +845.41, PF 1.52
+
 2026 Jan-Feb baseline:
 
 - Buy trades: 45, -18.31, PF 0.98
@@ -42,11 +56,22 @@ Discovery EXP-005:
 - Buy trades: 30, +175.55, PF 1.30
 - Sell trades: 58, -122.25, PF 0.91
 
+2026 Jan-Feb v1.06 baseline:
+
+- Buy trades: 45, -5.98, PF 0.99
+- Sell trades: 58, -95.06, PF 0.93
+
+2026 Jan-Feb v1.06 EXP-005:
+
+- Buy trades: 30, +175.95, PF 1.31
+- Sell trades: 58, -128.47, PF 0.91
+
 ## Current Read
 
-EXP-005 improved both the discovery window and the first unseen validation
-window. It is still not accepted because one modest validation result is not
-enough. The next validation windows are:
+Under the v1.06 lot/margin guard, EXP-005 still improves both the discovery
+window and the first unseen validation window. The max executed lot is now 0.10
+in the rerun reports. EXP-005 is still not accepted because one modest
+validation result is not enough. The next validation windows are:
 
 - 2025-07-01 to 2025-12-31
 - 2025-01-01 to 2025-06-30

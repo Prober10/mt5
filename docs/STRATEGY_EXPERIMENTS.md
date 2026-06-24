@@ -136,6 +136,12 @@ window. It should:
   - Buy side improved from -18.31 to +175.55.
   - Sell side was weak in both versions.
   - Directionally positive, but not strong enough for acceptance.
+- v1.06 safety-layer rerun:
+  - Discovery baseline: 546.43, PF 1.14, max lot 0.10
+  - Discovery EXP-005: 1,070.29, PF 1.37, max lot 0.10
+  - Jan-Feb baseline: -98.46, PF 0.96, max lot 0.10
+  - Jan-Feb EXP-005: +50.06, PF 1.03, max lot 0.10
+  - EXP-005 still improves both tested windows after the lot/margin guard.
 - Acceptance status:
   - Not accepted yet. One unseen validation window is encouraging, but the rule
     still needs longer 2025 validation.
@@ -158,8 +164,10 @@ window. It should:
 - Decision:
   - Accepted as a safety rule, not as a strategy edge improvement.
 - Testing status:
-  - Compile verification only so far. Future validation tests should use this
-    protection layer unless explicitly comparing older historical behavior.
+  - Compile verification passed.
+  - Rerun reports confirmed max executed lot is now `0.10`.
+  - Future validation tests should use this protection layer unless explicitly
+    comparing older historical behavior.
 
 ### EXP-006: Minimum ATR Filter
 
