@@ -103,7 +103,7 @@ window. It should:
 
 ### EXP-005: Restrict Buy Trades By Session
 
-- Status: `Validation`
+- Status: `Mixed validation`
 - Summary: Keep sell behavior unchanged, but allow buys only during stronger
   historical buy sessions. The first tested candidate restricts buy setup
   placement to `13-23` broker time.
@@ -142,9 +142,14 @@ window. It should:
   - Jan-Feb baseline: -98.46, PF 0.96, max lot 0.10
   - Jan-Feb EXP-005: +50.06, PF 1.03, max lot 0.10
   - EXP-005 still improves both tested windows after the lot/margin guard.
+- 2025 H2 validation:
+  - Baseline: +643.41, PF 1.12, 290 trades, equity DD 378.90 / 3.72%
+  - EXP-005: +513.37, PF 1.12, 236 trades, equity DD 479.84 / 4.77%
+  - Buy side remained profitable, but total net and drawdown were worse than
+    baseline.
 - Acceptance status:
-  - Not accepted yet. One unseen validation window is encouraging, but the rule
-    still needs longer 2025 validation.
+  - Not accepted yet. The rule helped both 2026 windows but hurt 2025 H2, so it
+    is regime-dependent until proven otherwise.
 
 ### EXP-008: Lot Size And Margin Safety Guard
 
@@ -171,7 +176,7 @@ window. It should:
 
 ### EXP-009: Pending Order Expiration
 
-- Status: `Validation`
+- Status: `Mixed validation`
 - Code version: `1.07`
 - Summary: Add configurable pending-order expiration so old retracement setups
   do not remain live indefinitely.
@@ -195,9 +200,14 @@ window. It should:
   - v1.07 EXP-009 6h: +88.26, PF 1.05, 86 trades, equity DD 383.22 / 3.74%
   - Buy side improved from +175.95 / PF 1.31 to +188.45 / PF 1.33.
   - Sell side remained negative, but improved from -128.47 to -102.77.
+- 2025 H2 validation:
+  - Baseline: +643.41, PF 1.12, 290 trades, equity DD 378.90 / 3.72%
+  - EXP-009 6h: +421.71, PF 1.10, 229 trades, equity DD 534.55 / 5.31%
+  - The expiration rule improved September, but worsened July, August, and
+    November enough to underperform baseline overall.
 - Acceptance status:
-  - Not accepted yet. Discovery and first validation are positive, but longer
-    2025 validation is still required.
+  - Not accepted yet. Discovery and Jan-Feb 2026 were positive, but 2025 H2 was
+    weaker than baseline.
 
 ### EXP-006: Minimum ATR Filter
 

@@ -26,6 +26,14 @@ pending orders.
 | v1.06 EXP-005 with lot/margin guard | Current validation | 50.06 | 1.03 | 88 | 420.96 / 4.11% | 0.0518 | 0.0457 | 0.0550 | Still improves Jan-Feb modestly |
 | v1.07 EXP-009 6h pending expiration | Validation | 88.26 | 1.05 | 86 | 383.22 / 3.74% | 0.0535 | 0.0467 | 0.0571 | Improves Jan-Feb versus EXP-005 |
 
+## Validation Window: 2025-07-01 to 2025-12-31
+
+| Test | Status | Net | PF | Trades | Equity DD | Avg Lot | Avg Buy Lot | Avg Sell Lot | Notes |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| v1.07 baseline with lot/margin guard | Validation baseline | 643.41 | 1.12 | 290 | 378.90 / 3.72% | 0.0808 | 0.0819 | 0.0798 | Best result on this window |
+| v1.07 EXP-005 buy setup session filter | Mixed validation | 513.37 | 1.12 | 236 | 479.84 / 4.77% | 0.0812 | 0.0846 | 0.0796 | Reduced trades but worsened net and DD |
+| v1.07 EXP-009 6h pending expiration | Mixed validation | 421.71 | 1.10 | 229 | 534.55 / 5.31% | 0.0823 | 0.0869 | 0.0802 | Helped September, hurt the full window |
+
 ## Side Split Highlights
 
 Discovery baseline:
@@ -78,13 +86,29 @@ Discovery v1.07 EXP-009 6h:
 - Buy trades: 30, +188.45, PF 1.33
 - Sell trades: 56, -102.77, PF 0.92
 
+2025 H2 v1.07 baseline:
+
+- Buy trades: 132, +526.22, PF 1.23
+- Sell trades: 158, +123.32, PF 1.04
+
+2025 H2 v1.07 EXP-005:
+
+- Buy trades: 76, +472.53, PF 1.39
+- Sell trades: 160, +44.74, PF 1.01
+
+2025 H2 v1.07 EXP-009 6h:
+
+- Buy trades: 72, +358.57, PF 1.30
+- Sell trades: 157, +65.61, PF 1.02
+
 ## Current Read
 
-Under the v1.06 lot/margin guard, EXP-005 still improves both the discovery
-window and the first unseen validation window. EXP-009's 6-hour pending-order
-expiration improves both of those tested windows further, but still needs longer
-2025 validation. The max executed lot is now 0.10 in the rerun reports. The next
-validation windows are:
+Under the v1.06/v1.07 lot/margin guard, EXP-005 and EXP-009 improve the 2026
+discovery and Jan-Feb validation windows, but they underperform the baseline on
+the longer 2025 H2 validation window. The max executed lot is now 0.10 in the
+rerun reports.
 
-- 2025-07-01 to 2025-12-31
-- 2025-01-01 to 2025-06-30
+The current decision is to keep EXP-005 and EXP-009 available as configurable
+experiments, but not accept them as production defaults yet. The next strategy
+step should explain why the rules helped 2026 but hurt 2025 H2 before adding
+more filters.
