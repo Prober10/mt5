@@ -24,6 +24,7 @@ pending orders.
 | EXP-005 buy setup session filter | Validation | 55.88 | 1.03 | 88 | 420.96 / 4.11% | 0.0545 | 0.0483 | 0.0578 | Improved, but only modestly |
 | v1.06 baseline with lot/margin guard | Current validation baseline | -98.46 | 0.96 | 103 | 475.95 / 4.75% | 0.0525 | 0.0511 | 0.0536 | Max lot capped at 0.10 |
 | v1.06 EXP-005 with lot/margin guard | Current validation | 50.06 | 1.03 | 88 | 420.96 / 4.11% | 0.0518 | 0.0457 | 0.0550 | Still improves Jan-Feb modestly |
+| v1.07 EXP-009 6h pending expiration | Validation | 88.26 | 1.05 | 86 | 383.22 / 3.74% | 0.0535 | 0.0467 | 0.0571 | Improves Jan-Feb versus EXP-005 |
 
 ## Side Split Highlights
 
@@ -72,14 +73,18 @@ Discovery v1.07 EXP-009 6h:
 - Buy trades: 30, +175.95, PF 1.31
 - Sell trades: 58, -128.47, PF 0.91
 
+2026 Jan-Feb v1.07 EXP-009 6h:
+
+- Buy trades: 30, +188.45, PF 1.33
+- Sell trades: 56, -102.77, PF 0.92
+
 ## Current Read
 
 Under the v1.06 lot/margin guard, EXP-005 still improves both the discovery
 window and the first unseen validation window. EXP-009's 6-hour pending-order
-expiration improves the discovery window further, but has not been validated yet.
-The max executed lot is now 0.10 in the rerun reports. The next validation
-windows are:
+expiration improves both of those tested windows further, but still needs longer
+2025 validation. The max executed lot is now 0.10 in the rerun reports. The next
+validation windows are:
 
-- 2026-01-01 to 2026-02-28 for EXP-009
 - 2025-07-01 to 2025-12-31
 - 2025-01-01 to 2025-06-30

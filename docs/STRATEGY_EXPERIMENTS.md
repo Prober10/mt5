@@ -171,7 +171,7 @@ window. It should:
 
 ### EXP-009: Pending Order Expiration
 
-- Status: `Discovery`
+- Status: `Validation`
 - Code version: `1.07`
 - Summary: Add configurable pending-order expiration so old retracement setups
   do not remain live indefinitely.
@@ -184,15 +184,20 @@ window. It should:
   - Diagnostics showed fills older than 6 hours were weak.
   - This is primarily order-lifecycle hygiene, not a pure optimization filter.
 - Required next test:
-  - Validate on `2026-01-01` to `2026-02-28`.
+  - Validate on the longer 2025 windows.
 - Discovery result: `2026-03-01` to `2026-06-19`
   - v1.06 EXP-005: 1,070.29, PF 1.37, 147 trades, equity DD 280.21 / 2.61%
   - v1.07 EXP-009 6h: 1,193.71, PF 1.44, 139 trades, equity DD 273.60 / 2.56%
   - Buy side improved from +234.54 / PF 1.18 to +395.82 / PF 1.37.
   - Max executed lot remained `0.10`.
+- Validation result: `2026-01-01` to `2026-02-28`
+  - v1.06 EXP-005: +50.06, PF 1.03, 88 trades, equity DD 420.96 / 4.11%
+  - v1.07 EXP-009 6h: +88.26, PF 1.05, 86 trades, equity DD 383.22 / 3.74%
+  - Buy side improved from +175.95 / PF 1.31 to +188.45 / PF 1.33.
+  - Sell side remained negative, but improved from -128.47 to -102.77.
 - Acceptance status:
-  - Not accepted yet. Discovery-window result is promising, but validation is
-    still required.
+  - Not accepted yet. Discovery and first validation are positive, but longer
+    2025 validation is still required.
 
 ### EXP-006: Minimum ATR Filter
 
