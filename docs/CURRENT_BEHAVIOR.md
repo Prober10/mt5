@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.06 of
+This document describes the behavior implemented by version 1.07 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -77,7 +77,9 @@ distance or is on the wrong side of the current market.
 ## Order And Setup Lifecycle
 
 - The EA permits only one active position or pending order for its magic number.
-- Pending orders use Good-Till-Cancelled expiration.
+- Pending orders use Good-Till-Cancelled expiration by default.
+- If `InpPendingOrderExpirationHours` is greater than zero, pending orders are
+  sent with a broker expiration time that many hours after placement.
 - When a newer confirmed swing appears before entry, the old pending order is
   cancelled and a setup is calculated from the new swing.
 - An open position is never replaced because a newer swing appears.

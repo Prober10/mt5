@@ -115,9 +115,10 @@ public:
 
    PendingOrderResult PlacePendingOrder(const string symbol,
                                         const TradeSetup &setup,
-                                        const string comment)
+                                        const string comment,
+                                        const double expiration_hours)
      {
-      if(!setup.valid || setup.volume <= 0.0)
+      if(!setup.valid || setup.volume <= 0.0 || expiration_hours < 0.0)
          return PENDING_ORDER_INVALID_SETUP;
 
       const PendingPriceValidation price_validation = ValidatePendingPrices(symbol, setup);
@@ -130,18 +131,25 @@ public:
         }
 
       m_trade.SetTypeFillingBySymbol(symbol);
+      const ENUM_ORDER_TYPE_TIME order_time = (expiration_hours > 0.0)
+                                              ? ORDER_TIME_SPECIFIED
+                                              : ORDER_TIME_GTC;
+      const datetime expiration = (expiration_hours > 0.0)
+                                  ? TimeCurrent() + (datetime)MathRound(expiration_hours * 3600.0)
+                                  : 0;
+
       bool placed = false;
       if(setup.swing.direction == SWING_DIRECTION_BULLISH)
         {
          placed = m_trade.BuyLimit(setup.volume, setup.entry, symbol,
                                    setup.stop_loss, setup.take_profit,
-                                   ORDER_TIME_GTC, 0, comment);
+                                   order_time, expiration, comment);
         }
       else if(setup.swing.direction == SWING_DIRECTION_BEARISH)
         {
          placed = m_trade.SellLimit(setup.volume, setup.entry, symbol,
                                     setup.stop_loss, setup.take_profit,
-                                    ORDER_TIME_GTC, 0, comment);
+                                    order_time, expiration, comment);
         }
 
       if(!placed)

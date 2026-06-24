@@ -29,6 +29,7 @@ input group "Execution"
 input ulong InpMagicNumber = 790015;
 input int   InpDeviationPoints = 20;
 input string InpOrderComment = "Fibo 79 EA";
+input double InpPendingOrderExpirationHours = 0.0;
 
 input group "Diagnostics"
 input bool   InpEnableDiagnostics = false;

@@ -6,6 +6,7 @@ param(
     [string]$FromDate,
     [string]$ToDate,
     [string]$UseBuySessionFilter,
+    [string]$PendingOrderExpirationHours,
     [string]$ReportLabel,
     [int]$TimeoutSeconds = 900
 )
@@ -61,6 +62,17 @@ if (-not [string]::IsNullOrWhiteSpace($UseBuySessionFilter)) {
         default { throw "UseBuySessionFilter must be true/false, yes/no, or 1/0." }
     }
     $config = $config -replace '(?m)^InpUseBuySessionFilter=.*$', "InpUseBuySessionFilter=$filterText||false||0||true||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($PendingOrderExpirationHours)) {
+    [double]$expirationHours = 0.0
+    if (-not [double]::TryParse($PendingOrderExpirationHours, [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$expirationHours)) {
+        throw "PendingOrderExpirationHours must be a number."
+    }
+    if ($expirationHours -lt 0.0) {
+        throw "PendingOrderExpirationHours must be greater than or equal to zero."
+    }
+    $expirationText = $expirationHours.ToString('0.########', [Globalization.CultureInfo]::InvariantCulture)
+    $config = $config -replace '(?m)^InpPendingOrderExpirationHours=.*$', "InpPendingOrderExpirationHours=$expirationText||0.0||1.000000||24.000000||N"
 }
 [IO.File]::WriteAllText($configPath, $config, [Text.Encoding]::Unicode)
 

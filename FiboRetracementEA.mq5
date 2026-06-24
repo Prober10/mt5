@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.06"
+#property version   "1.07"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -38,6 +38,7 @@ bool InputsAreValid(void)
            InpMaxLotSize >= InpMinLotSize &&
            InpLotStep > 0.0 &&
            InpMinMarginLevelPercent >= 0.0 &&
+           InpPendingOrderExpirationHours >= 0.0 &&
            (InpAllowBuy || InpAllowSell));
   }
 
@@ -204,7 +205,8 @@ void OnTick(void)
      }
 
    const PendingOrderResult order_result =
-      g_trade_manager.PlacePendingOrder(_Symbol, setup, InpOrderComment);
+      g_trade_manager.PlacePendingOrder(_Symbol, setup, InpOrderComment,
+                                        InpPendingOrderExpirationHours);
    if(order_result == PENDING_ORDER_INVALID_SETUP)
      {
       g_diagnostics.LogSetupRejected(_Symbol, swing, setup, "pending_price_invalid");

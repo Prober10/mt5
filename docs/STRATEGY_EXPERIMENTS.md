@@ -169,6 +169,31 @@ window. It should:
   - Future validation tests should use this protection layer unless explicitly
     comparing older historical behavior.
 
+### EXP-009: Pending Order Expiration
+
+- Status: `Discovery`
+- Code version: `1.07`
+- Summary: Add configurable pending-order expiration so old retracement setups
+  do not remain live indefinitely.
+- Default input:
+  - `InpPendingOrderExpirationHours=0.0`, meaning Good-Till-Cancelled behavior.
+- First candidate:
+  - Test `InpPendingOrderExpirationHours=6.0` alongside the current v1.06
+    safety layer and EXP-005 buy-session filter.
+- Rationale:
+  - Diagnostics showed fills older than 6 hours were weak.
+  - This is primarily order-lifecycle hygiene, not a pure optimization filter.
+- Required next test:
+  - Validate on `2026-01-01` to `2026-02-28`.
+- Discovery result: `2026-03-01` to `2026-06-19`
+  - v1.06 EXP-005: 1,070.29, PF 1.37, 147 trades, equity DD 280.21 / 2.61%
+  - v1.07 EXP-009 6h: 1,193.71, PF 1.44, 139 trades, equity DD 273.60 / 2.56%
+  - Buy side improved from +234.54 / PF 1.18 to +395.82 / PF 1.37.
+  - Max executed lot remained `0.10`.
+- Acceptance status:
+  - Not accepted yet. Discovery-window result is promising, but validation is
+    still required.
+
 ### EXP-006: Minimum ATR Filter
 
 - Status: `Idea`
