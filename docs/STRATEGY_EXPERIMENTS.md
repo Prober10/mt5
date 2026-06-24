@@ -140,6 +140,27 @@ window. It should:
   - Not accepted yet. One unseen validation window is encouraging, but the rule
     still needs longer 2025 validation.
 
+### EXP-008: Lot Size And Margin Safety Guard
+
+- Status: `Accepted as protection`
+- Code version: `1.06`
+- Summary: Enforce two-decimal lot sizing, a configurable max lot cap, and a
+  projected margin-level guard.
+- Default protection inputs:
+  - `InpMinLotSize=0.01`
+  - `InpMaxLotSize=0.10`
+  - `InpLotStep=0.01`
+  - `InpMinMarginLevelPercent=500.0`
+- Rationale:
+  - Funded-account execution should avoid oversized positions and preserve
+    margin headroom.
+  - Lot sizes such as `0.001` should not be used.
+- Decision:
+  - Accepted as a safety rule, not as a strategy edge improvement.
+- Testing status:
+  - Compile verification only so far. Future validation tests should use this
+    protection layer unless explicitly comparing older historical behavior.
+
 ### EXP-006: Minimum ATR Filter
 
 - Status: `Idea`

@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.05"
+#property version   "1.06"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -34,6 +34,10 @@ bool InputsAreValid(void)
            InpStopBuffer >= 0.0 &&
            InpRiskPercent > 0.0 &&
            InpMaxDailyClosedLossPercent > 0.0 &&
+           InpMinLotSize > 0.0 &&
+           InpMaxLotSize >= InpMinLotSize &&
+           InpLotStep > 0.0 &&
+           InpMinMarginLevelPercent >= 0.0 &&
            (InpAllowBuy || InpAllowSell));
   }
 
@@ -182,7 +186,9 @@ void OnTick(void)
    const VolumeCalculationResult volume_result =
       g_risk_manager.CalculateVolume(_Symbol, swing.direction,
                                      setup.entry, setup.stop_loss,
-                                     InpRiskPercent, setup.volume);
+                                     InpRiskPercent, InpMinLotSize,
+                                     InpMaxLotSize, InpLotStep,
+                                     InpMinMarginLevelPercent, setup.volume);
    if(volume_result == VOLUME_PERMANENTLY_UNAVAILABLE)
      {
       g_diagnostics.LogSetupRejected(_Symbol, swing, setup, "volume_permanently_unavailable");

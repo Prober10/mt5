@@ -28,20 +28,67 @@ private:
              + HistoryDealGetDouble(ticket, DEAL_FEE);
      }
 
-   double NormalizeVolumeDown(const string symbol, const double volume) const
+   double EffectiveVolumeStep(const string symbol, const double configured_step) const
      {
-      const double minimum = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
-      const double maximum = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
-      const double step = SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP);
-      if(minimum <= 0.0 || maximum <= 0.0 || step <= 0.0 || volume < minimum)
+      const double symbol_step = SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP);
+      if(symbol_step <= 0.0 || configured_step <= 0.0)
+         return 0.0;
+
+      return MathMax(symbol_step, configured_step);
+     }
+
+   double NormalizeVolumeDown(const string symbol,
+                              const double volume,
+                              const double configured_minimum,
+                              const double configured_maximum,
+                              const double configured_step) const
+     {
+      const double symbol_minimum = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
+      const double symbol_maximum = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
+      const double step = EffectiveVolumeStep(symbol, configured_step);
+      if(symbol_minimum <= 0.0 || symbol_maximum <= 0.0 || step <= 0.0)
+         return 0.0;
+
+      const double minimum = MathMax(symbol_minimum, configured_minimum);
+      const double maximum = MathMin(symbol_maximum, configured_maximum);
+      if(minimum <= 0.0 || maximum <= 0.0 || maximum < minimum || volume < minimum)
          return 0.0;
 
       const double capped = MathMin(volume, maximum);
       const double normalized = MathFloor((capped + 1e-12) / step) * step;
-      if(normalized < minimum)
+      const double rounded = NormalizeDouble(normalized, 2);
+      if(rounded < minimum)
          return 0.0;
 
-      return NormalizeDouble(normalized, 8);
+      return rounded;
+     }
+
+   bool MarginLevelAllowsTrade(const string symbol,
+                               const SwingDirection direction,
+                               const double volume,
+                               const double price,
+                               const double minimum_margin_level_percent) const
+     {
+      if(minimum_margin_level_percent <= 0.0)
+         return true;
+
+      const ENUM_ORDER_TYPE order_type = (direction == SWING_DIRECTION_BULLISH)
+                                         ? ORDER_TYPE_BUY
+                                         : ORDER_TYPE_SELL;
+      double required_margin = 0.0;
+      if(!OrderCalcMargin(order_type, symbol, volume, price, required_margin))
+        {
+         PrintFormat("Unable to calculate required margin for %s. Error: %d", symbol, GetLastError());
+         return false;
+        }
+
+      const double equity = AccountInfoDouble(ACCOUNT_EQUITY);
+      const double margin_after_trade = AccountInfoDouble(ACCOUNT_MARGIN) + required_margin;
+      if(equity <= 0.0 || margin_after_trade <= 0.0)
+         return false;
+
+      const double margin_level_after_trade = equity / margin_after_trade * 100.0;
+      return (margin_level_after_trade >= minimum_margin_level_percent);
      }
 
 public:
@@ -116,11 +163,16 @@ public:
                                            const double entry,
                                            const double stop_loss,
                                            const double risk_percent,
+                                           const double minimum_lot,
+                                           const double maximum_lot,
+                                           const double lot_step,
+                                           const double minimum_margin_level_percent,
                                            double &volume) const
      {
       volume = 0.0;
       if(entry <= 0.0 || stop_loss <= 0.0 || entry == stop_loss ||
-         risk_percent <= 0.0)
+         risk_percent <= 0.0 || minimum_lot <= 0.0 || maximum_lot < minimum_lot ||
+         lot_step <= 0.0 || minimum_margin_level_percent < 0.0)
          return VOLUME_PERMANENTLY_UNAVAILABLE;
 
       const ENUM_ORDER_TYPE order_type = (direction == SWING_DIRECTION_BULLISH)
@@ -139,7 +191,14 @@ public:
 
       const double risk_money = AccountInfoDouble(ACCOUNT_EQUITY) * risk_percent / 100.0;
       const double raw_volume = risk_money / one_lot_loss;
-      volume = NormalizeVolumeDown(symbol, raw_volume);
+      volume = NormalizeVolumeDown(symbol, raw_volume, minimum_lot, maximum_lot, lot_step);
+      const double volume_step = EffectiveVolumeStep(symbol, lot_step);
+      while(volume > 0.0 &&
+            !MarginLevelAllowsTrade(symbol, direction, volume, entry, minimum_margin_level_percent))
+        {
+         volume = NormalizeVolumeDown(symbol, volume - volume_step, minimum_lot, maximum_lot, lot_step);
+        }
+
       if(volume <= 0.0)
          return VOLUME_PERMANENTLY_UNAVAILABLE;
 

@@ -20,6 +20,10 @@ input group "Protection"
 input double InpStopBuffer = 0.10;
 input double InpRiskPercent = 0.50;
 input double InpMaxDailyClosedLossPercent = 1.00;
+input double InpMinLotSize = 0.01;
+input double InpMaxLotSize = 0.10;
+input double InpLotStep = 0.01;
+input double InpMinMarginLevelPercent = 500.0;
 
 input group "Execution"
 input ulong InpMagicNumber = 790015;

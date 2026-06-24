@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.05 of
+This document describes the behavior implemented by version 1.06 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -47,9 +47,18 @@ distance or is on the wrong side of the current market.
 
 - Default risk is 0.5% of current account equity.
 - The EA uses `OrderCalcProfit` to estimate the entry-to-stop loss for one lot.
-- Volume is rounded down to the broker's volume step and capped at its maximum.
+- Volume is rounded down to the stricter of the broker volume step and
+  `InpLotStep`, which defaults to `0.01`.
+- Volume must be at least `InpMinLotSize`, default `0.01`.
+- Volume is capped at `InpMaxLotSize`, default `0.10`.
+- This means the EA will not intentionally place `0.001` lots when the default
+  protection inputs are used.
+- Before accepting the volume, the EA estimates required margin and reduces
+  volume until the projected margin level remains at or above
+  `InpMinMarginLevelPercent`, default `500%`.
 - A setup is skipped when the broker's minimum volume would exceed the risk
-  allowance or a compliant volume cannot be calculated.
+  allowance, margin protection cannot be satisfied, or a compliant volume cannot
+  be calculated.
 
 ## Daily Loss Protection
 
