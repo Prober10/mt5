@@ -242,3 +242,24 @@ window. It should:
   - Check whether the threshold remains useful on unseen windows.
 - Acceptance status:
   - Not accepted yet. This is only a hypothesis.
+
+### EXP-010: Avoid Mid-Sized Confirmed Swings
+
+- Status: `Idea`
+- Summary: Skip setups where confirmed swing size is between `2500` and `5000`
+  points.
+- Rationale:
+  - Diagnostics comparison showed this swing-size band was weak across all
+    three baseline windows tested so far.
+  - Larger swings, especially `5000+`, were consistently stronger.
+  - This is more specific than a broad minimum swing-size filter because very
+    small 2025 H2 swings were not weak in the same way.
+- Baseline evidence:
+  - 2026 Mar-Jun: 76 trades, -179.75, PF 0.91
+  - 2026 Jan-Feb: 39 trades, -389.09, PF 0.64
+  - 2025 H2: 88 trades, -382.02, PF 0.83
+- Required next test:
+  - Test against the current baseline by itself.
+  - Do not stack with EXP-005 or EXP-009 until it proves useful independently.
+- Acceptance status:
+  - Not accepted yet. This is the next candidate experiment.

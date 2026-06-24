@@ -112,3 +112,7 @@ The current decision is to keep EXP-005 and EXP-009 available as configurable
 experiments, but not accept them as production defaults yet. The next strategy
 step should explain why the rules helped 2026 but hurt 2025 H2 before adding
 more filters.
+
+The diagnostics comparison points to the confirmed swing-size band `2500-5000`
+points as the cleanest repeated weakness so far. The next candidate experiment
+is EXP-010, tested by itself against the current baseline.
