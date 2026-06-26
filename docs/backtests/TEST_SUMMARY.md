@@ -138,3 +138,9 @@ It is now the current best candidate strategy layer, but not production-ready:
 2025 H1 still lost money and reached `7.66%` equity drawdown with EXP-010. The
 next strategy step should analyze that weak regime before making EXP-010 the
 default or stacking more filters.
+
+2025 H1 weakness analysis points to setup time as the next candidate area:
+after EXP-010, the `12-17` broker-time setup block was positive in every tested
+window, while 2025 H1 was damaged mainly by `6-11` and `18-23` setups. EXP-011
+will test an optional all-direction core-session filter from `12` through `17`,
+with EXP-010 enabled and other experimental filters disabled.

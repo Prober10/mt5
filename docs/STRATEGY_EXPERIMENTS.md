@@ -283,3 +283,26 @@ window. It should:
   - Accepted as the current best candidate strategy layer.
   - Keep configurable. Do not make it the production default until the 2025 H1
     weakness is understood and reduced.
+
+### EXP-011: Core Setup Session Filter
+
+- Status: `Idea`
+- Summary: Add an optional all-direction setup session filter and test allowing
+  setups only from `12` through `17` broker time.
+- Rationale:
+  - After EXP-010, the `12-17` setup-hour block was positive in every tested
+    window.
+  - 2025 H1 remained weak mostly because of `6-11` and `18-23` setups.
+  - A broad ban on `6-11` would likely overfit because that block was profitable
+    in the other EXP-010 windows.
+- EXP-010 setup-hour evidence:
+  - 2025 H1 `12-17`: +477.90, PF 1.46
+  - 2025 H2 `12-17`: +485.21, PF 1.51
+  - 2026 Jan-Feb `12-17`: +216.21, PF 1.57
+  - 2026 Mar-Jun `12-17`: +61.62, PF 1.10
+- Required next test:
+  - Implement as a configurable all-direction setup filter.
+  - Test only with EXP-010 enabled.
+  - Keep EXP-005 and EXP-009 disabled.
+- Acceptance status:
+  - Not accepted yet. This is the next candidate experiment.
