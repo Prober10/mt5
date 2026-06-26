@@ -16,6 +16,7 @@ standard `Examples\\ZigZag` indicator.
 - Entry level: 79% Fibonacci retracement
 - Risk per trade: 0.5%
 - Max daily closed loss: 1%
+- Optional high-impact-news guard for funded-account rule compliance
 
 See [SPEC.md](SPEC.md) for the strategy specification and
 [docs/CURRENT_BEHAVIOR.md](docs/CURRENT_BEHAVIOR.md) for an exact description of
@@ -43,6 +44,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\run-backtest.ps1
   -UseBuySessionFilter true `
   -ReportLabel 'exp005-20260101-20260228'
 ```
+
+The runner also supports toggling configurable protections and experiments, for
+example `-UseSwingBandFilter true`, `-UseNewsGuard true`,
+`-NewsCurrencies 'USD'`, and `-PendingOrderExpirationHours 6`.
 
 ## Diagnostics
 

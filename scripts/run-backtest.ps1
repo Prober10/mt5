@@ -9,6 +9,12 @@ param(
     [string]$UseSwingBandFilter,
     [string]$AvoidSwingMinPoints,
     [string]$AvoidSwingMaxPoints,
+    [string]$UseNewsGuard,
+    [string]$NewsCurrencies,
+    [string]$NewsMinutesBefore,
+    [string]$NewsMinutesAfter,
+    [string]$NewsCancelPendingMinutesBefore,
+    [string]$NewsFailSafeBlock,
     [string]$PendingOrderExpirationHours,
     [string]$ReportLabel,
     [int]$TimeoutSeconds = 900
@@ -95,6 +101,46 @@ if (-not [string]::IsNullOrWhiteSpace($AvoidSwingMaxPoints)) {
     }
     $maxPointsText = $maxPoints.ToString('0.########', [Globalization.CultureInfo]::InvariantCulture)
     $config = $config -replace '(?m)^InpAvoidSwingMaxPoints=.*$', "InpAvoidSwingMaxPoints=$maxPointsText||5000.0||500.000000||50000.000000||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($UseNewsGuard)) {
+    $filterText = switch -Regex ($UseNewsGuard.Trim()) {
+        '^(1|true|yes)$' { 'true'; break }
+        '^(0|false|no)$' { 'false'; break }
+        default { throw "UseNewsGuard must be true/false, yes/no, or 1/0." }
+    }
+    $config = $config -replace '(?m)^InpUseNewsGuard=.*$', "InpUseNewsGuard=$filterText||false||0||true||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($NewsCurrencies)) {
+    $config = $config -replace '(?m)^InpNewsCurrencies=.*$', "InpNewsCurrencies=$NewsCurrencies"
+}
+if (-not [string]::IsNullOrWhiteSpace($NewsMinutesBefore)) {
+    [int]$minutesBefore = 0
+    if (-not [int]::TryParse($NewsMinutesBefore, [ref]$minutesBefore) -or $minutesBefore -lt 0) {
+        throw "NewsMinutesBefore must be a non-negative integer."
+    }
+    $config = $config -replace '(?m)^InpNewsMinutesBefore=.*$', "InpNewsMinutesBefore=$minutesBefore||2||1||30||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($NewsMinutesAfter)) {
+    [int]$minutesAfter = 0
+    if (-not [int]::TryParse($NewsMinutesAfter, [ref]$minutesAfter) -or $minutesAfter -lt 0) {
+        throw "NewsMinutesAfter must be a non-negative integer."
+    }
+    $config = $config -replace '(?m)^InpNewsMinutesAfter=.*$', "InpNewsMinutesAfter=$minutesAfter||2||1||30||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($NewsCancelPendingMinutesBefore)) {
+    [int]$cancelMinutesBefore = 0
+    if (-not [int]::TryParse($NewsCancelPendingMinutesBefore, [ref]$cancelMinutesBefore) -or $cancelMinutesBefore -lt 0) {
+        throw "NewsCancelPendingMinutesBefore must be a non-negative integer."
+    }
+    $config = $config -replace '(?m)^InpNewsCancelPendingMinutesBefore=.*$', "InpNewsCancelPendingMinutesBefore=$cancelMinutesBefore||5||1||60||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($NewsFailSafeBlock)) {
+    $filterText = switch -Regex ($NewsFailSafeBlock.Trim()) {
+        '^(1|true|yes)$' { 'true'; break }
+        '^(0|false|no)$' { 'false'; break }
+        default { throw "NewsFailSafeBlock must be true/false, yes/no, or 1/0." }
+    }
+    $config = $config -replace '(?m)^InpNewsFailSafeBlock=.*$', "InpNewsFailSafeBlock=$filterText||false||0||true||N"
 }
 if (-not [string]::IsNullOrWhiteSpace($PendingOrderExpirationHours)) {
     [double]$expirationHours = 0.0

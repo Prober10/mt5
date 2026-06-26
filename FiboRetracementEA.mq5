@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.08"
+#property version   "1.09"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -9,6 +9,7 @@
 #include "Include/FiboEA/RiskManager.mqh"
 #include "Include/FiboEA/TradeManager.mqh"
 #include "Include/FiboEA/SetupTracker.mqh"
+#include "Include/FiboEA/NewsGuard.mqh"
 #include "Include/FiboEA/Diagnostics.mqh"
 
 CZigZagSwingDetector g_swing_detector;
@@ -16,11 +17,13 @@ CFiboCalculator      g_fibo_calculator;
 CRiskManager         g_risk_manager;
 CTradeManager        g_trade_manager;
 CSetupTracker        g_setup_tracker;
+CNewsGuard           g_news_guard;
 CDiagnostics         g_diagnostics;
 
 datetime g_last_signal_bar = 0;
 datetime g_current_day = 0;
 bool     g_daily_limit_logged = false;
+bool     g_news_guard_logged = false;
 
 bool InputsAreValid(void)
   {
@@ -40,6 +43,9 @@ bool InputsAreValid(void)
            InpMaxLotSize >= InpMinLotSize &&
            InpLotStep > 0.0 &&
            InpMinMarginLevelPercent >= 0.0 &&
+           InpNewsMinutesBefore >= 0 &&
+           InpNewsMinutesAfter >= 0 &&
+           InpNewsCancelPendingMinutesBefore >= InpNewsMinutesBefore &&
            InpPendingOrderExpirationHours >= 0.0 &&
            (InpAllowBuy || InpAllowSell));
   }
@@ -119,6 +125,68 @@ bool SwingBandAllowsSetup(const SwingData &swing)
            swing_points > InpAvoidSwingMaxPoints);
   }
 
+bool NewsGuardAllowsNewEntries(void)
+  {
+   bool restricted = false;
+   datetime event_time = 0;
+   string currency = "";
+   string event_name = "";
+   string reason = "";
+
+   const bool calendar_ok = g_news_guard.CheckRestriction(
+      InpUseNewsGuard, InpNewsMinutesBefore, InpNewsMinutesAfter,
+      InpNewsFailSafeBlock, restricted, event_time, currency, event_name, reason);
+
+   if(!calendar_ok && restricted)
+     {
+      if(!g_news_guard_logged)
+        {
+         PrintFormat("News guard fail-safe active: %s. New entries blocked.", reason);
+         g_news_guard_logged = true;
+        }
+      return false;
+     }
+
+   if(restricted)
+     {
+      if(!g_news_guard_logged)
+        {
+         PrintFormat("News guard active. New entries blocked near high-impact %s event '%s' at %s.",
+                     currency, event_name, TimeToString(event_time, TIME_DATE | TIME_MINUTES));
+         g_news_guard_logged = true;
+        }
+      return false;
+     }
+
+   g_news_guard_logged = false;
+   return true;
+  }
+
+void ApplyNewsPendingProtection(void)
+  {
+   bool restricted = false;
+   datetime event_time = 0;
+   string currency = "";
+   string event_name = "";
+   string reason = "";
+
+   const bool calendar_ok = g_news_guard.CheckRestriction(
+      InpUseNewsGuard, InpNewsCancelPendingMinutesBefore, InpNewsMinutesAfter,
+      InpNewsFailSafeBlock, restricted, event_time, currency, event_name, reason);
+
+   if(!restricted || !g_trade_manager.HasPendingOrder())
+      return;
+
+   if(g_trade_manager.CancelPendingOrders())
+     {
+      if(calendar_ok)
+         PrintFormat("News guard cancelled pending orders before high-impact %s event '%s' at %s.",
+                     currency, event_name, TimeToString(event_time, TIME_DATE | TIME_MINUTES));
+      else
+         PrintFormat("News guard cancelled pending orders because calendar check failed: %s.", reason);
+     }
+  }
+
 int OnInit(void)
   {
    if(!InputsAreValid())
@@ -129,6 +197,12 @@ int OnInit(void)
 
    if(!SymbolSelect(_Symbol, true))
       return INIT_FAILED;
+
+   if(InpUseNewsGuard && !g_news_guard.Initialize(InpNewsCurrencies))
+     {
+      Print("Invalid news guard currency configuration.");
+      return INIT_PARAMETERS_INCORRECT;
+     }
 
    if(!g_swing_detector.Initialize(_Symbol, InpSignalTimeframe,
                                    InpZigZagDepth, InpZigZagDeviation,
@@ -164,7 +238,12 @@ void OnTick(void)
    if(!DailyTradingAllowed())
       return;
 
+   ApplyNewsPendingProtection();
+
    if(!IsNewSignalBar() || g_trade_manager.HasActivePosition())
+      return;
+
+   if(!NewsGuardAllowsNewEntries())
       return;
 
    SwingData swing;

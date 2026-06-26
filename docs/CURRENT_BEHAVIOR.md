@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.08 of
+This document describes the behavior implemented by version 1.09 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -12,6 +12,7 @@ remains the source for the intended strategy rules.
   regardless of the chart timeframe.
 - Strategy evaluation runs once at the start of each new signal-timeframe bar.
 - Daily-loss protection is checked on every tick.
+- News protection is checked on every tick when enabled.
 - Trades and orders are isolated using the configured magic number.
 - Diagnostic CSV export is available as an opt-in testing aid and is disabled by
   default.
@@ -74,6 +75,30 @@ distance or is on the wrong side of the current market.
 - Existing open positions are not closed by the daily-loss guard.
 - If today's history cannot be read, trading is blocked as a safety measure.
 
+## News Protection
+
+- `InpUseNewsGuard` defaults to `false`.
+- When enabled, the EA uses the MT5 Economic Calendar to check configured
+  currencies for high-importance events.
+- The default currency list is `USD`, which is the main news driver for XAUUSD.
+- New entries are blocked from `InpNewsMinutesBefore` through
+  `InpNewsMinutesAfter`, default `2` minutes before through `2` minutes after a
+  high-impact event.
+- Pending orders are cancelled earlier, from
+  `InpNewsCancelPendingMinutesBefore` through `InpNewsMinutesAfter`, default `5`
+  minutes before through `2` minutes after a high-impact event.
+- Existing open positions are not closed by the news guard.
+- If `InpNewsFailSafeBlock` is `true`, the EA blocks new entries and cancels
+  pending orders when enabled calendar data cannot be checked.
+- Calendar event times are interpreted in broker trade-server time, matching the
+  MT5 Economic Calendar API.
+- This protection is designed for The Trading Pit's CFD Prime news restriction
+  on larger account sizes, where opening positions or having pending orders
+  trigger within 2 minutes before or after high-impact news is not allowed.
+- Strategy Tester may not have calendar access. With fail-safe enabled, this can
+  block all new entries in backtests. Keep `InpUseNewsGuard=false` for normal
+  strategy backtests unless specifically testing calendar behavior.
+
 ## Order And Setup Lifecycle
 
 - The EA permits only one active position or pending order for its magic number.
@@ -122,7 +147,7 @@ distance or is on the wrong side of the current market.
 ## Current Boundaries
 
 - There is an optional swing-band filter, disabled by default.
-- There is no news filter.
+- There is an optional high-impact-news guard, disabled by default.
 - There is no spread filter.
 - There is no trailing stop, break-even rule, or partial close.
 - Pending orders use no time-based expiration by default, but optional
@@ -154,4 +179,5 @@ distance or is on the wrong side of the current market.
 - `RiskManager.mqh`: volume sizing and broker-day loss protection.
 - `TradeManager.mqh`: broker validation and pending-order operations.
 - `SetupTracker.mqh`: persistent one-trade-per-swing state.
+- `NewsGuard.mqh`: high-impact-news entry blocking and pending-order protection.
 - `Diagnostics.mqh`: tester-only CSV export for setup and trade analysis.

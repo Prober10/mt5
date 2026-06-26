@@ -30,6 +30,14 @@ input double InpMaxLotSize = 0.10;
 input double InpLotStep = 0.01;
 input double InpMinMarginLevelPercent = 500.0;
 
+input group "News Protection"
+input bool   InpUseNewsGuard = false;
+input string InpNewsCurrencies = "USD";
+input int    InpNewsMinutesBefore = 2;
+input int    InpNewsMinutesAfter = 2;
+input int    InpNewsCancelPendingMinutesBefore = 5;
+input bool   InpNewsFailSafeBlock = true;
+
 input group "Execution"
 input ulong InpMagicNumber = 790015;
 input int   InpDeviationPoints = 20;
