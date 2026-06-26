@@ -32,3 +32,25 @@ If this script fails on a normal chart, the issue is MT5 calendar access or
 terminal/broker environment. If it succeeds on a normal chart but the Strategy
 Tester fails, the news guard implementation is probably fine and the limitation
 is tester-only calendar availability.
+
+## 2026-06-26 Terminal Probe Result
+
+Codex ran the installed script through MT5 startup on `XAUUSD,M15`.
+
+Terminal log:
+
+- `script CalendarProbe (XAUUSD,M15) loaded successfully`
+- `script CalendarProbe (XAUUSD,M15) removed`
+
+MQL5 log:
+
+- Request window: `2026.06.19 20:19` to `2026.07.03 20:19`
+- `CalendarProbe result: count=140, error=0`
+- Returned events included USD calendar events such as `Fed Governor Waller Speech`
+  and `Current Account`
+
+Interpretation:
+
+The MT5 Economic Calendar API is available in the normal terminal. The earlier
+`calendar_unavailable` result appears to be a Strategy Tester limitation, not a
+basic implementation or parameter issue in the news guard.
