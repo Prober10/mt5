@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.09"
+#property version   "1.10"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -198,9 +198,11 @@ int OnInit(void)
    if(!SymbolSelect(_Symbol, true))
       return INIT_FAILED;
 
-   if(InpUseNewsGuard && !g_news_guard.Initialize(InpNewsCurrencies))
+   if(InpUseNewsGuard && !g_news_guard.Initialize(InpNewsCurrencies,
+                                                   InpNewsDataSource,
+                                                   InpNewsCsvFileName))
      {
-      Print("Invalid news guard currency configuration.");
+      Print("Invalid news guard configuration or news CSV unavailable.");
       return INIT_PARAMETERS_INCORRECT;
      }
 

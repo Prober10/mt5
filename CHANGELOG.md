@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a CSV-backed high-impact-news source so Strategy Tester can include
+  funded-account news restrictions.
+- Added `ExportHighImpactNewsCsv` to export MT5 Economic Calendar events into
+  `Common\Files\FiboEA\high-impact-news.csv`.
 - Retry locally invalid prices and unavailable volumes without repeating the
   same diagnostic on every signal bar.
 - Keep broker-side order failures retryable for transient execution errors.

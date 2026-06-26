@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.09 of
+This document describes the behavior implemented by version 1.10 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -78,9 +78,14 @@ distance or is on the wrong side of the current market.
 ## News Protection
 
 - `InpUseNewsGuard` defaults to `false`.
-- When enabled, the EA uses the MT5 Economic Calendar to check configured
-  currencies for high-importance events.
+- `InpNewsDataSource` defaults to `NEWS_SOURCE_AUTO`.
+- In a normal terminal, `NEWS_SOURCE_AUTO` uses the MT5 Economic Calendar to
+  check configured currencies for high-importance events.
+- In the Strategy Tester, `NEWS_SOURCE_AUTO` uses an exported CSV calendar file
+  so funded news rules can be included in backtests.
 - The default currency list is `USD`, which is the main news driver for XAUUSD.
+- `InpNewsCsvFileName` defaults to `FiboEA\high-impact-news.csv` in the MT5
+  common files area.
 - New entries are blocked from `InpNewsMinutesBefore` through
   `InpNewsMinutesAfter`, default `2` minutes before through `2` minutes after a
   high-impact event.
@@ -89,15 +94,16 @@ distance or is on the wrong side of the current market.
   minutes before through `2` minutes after a high-impact event.
 - Existing open positions are not closed by the news guard.
 - If `InpNewsFailSafeBlock` is `true`, the EA blocks new entries and cancels
-  pending orders when enabled calendar data cannot be checked.
+  pending orders when the enabled news source cannot be checked or loaded.
 - Calendar event times are interpreted in broker trade-server time, matching the
-  MT5 Economic Calendar API.
+  MT5 Economic Calendar API and the exported CSV produced by
+  `ExportHighImpactNewsCsv`.
 - This protection is designed for The Trading Pit's CFD Prime news restriction
   on larger account sizes, where opening positions or having pending orders
   trigger within 2 minutes before or after high-impact news is not allowed.
-- Strategy Tester may not have calendar access. With fail-safe enabled, this can
-  block all new entries in backtests. Keep `InpUseNewsGuard=false` for normal
-  strategy backtests unless specifically testing calendar behavior.
+- Strategy Tester may not have direct Economic Calendar access. Use
+  `tools/ExportHighImpactNewsCsv.mq5` to refresh the CSV before running
+  news-aware backtests.
 
 ## Order And Setup Lifecycle
 

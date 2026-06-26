@@ -10,7 +10,9 @@ param(
     [string]$AvoidSwingMinPoints,
     [string]$AvoidSwingMaxPoints,
     [string]$UseNewsGuard,
+    [string]$NewsDataSource,
     [string]$NewsCurrencies,
+    [string]$NewsCsvFileName,
     [string]$NewsMinutesBefore,
     [string]$NewsMinutesAfter,
     [string]$NewsCancelPendingMinutesBefore,
@@ -110,8 +112,20 @@ if (-not [string]::IsNullOrWhiteSpace($UseNewsGuard)) {
     }
     $config = $config -replace '(?m)^InpUseNewsGuard=.*$', "InpUseNewsGuard=$filterText||false||0||true||N"
 }
+if (-not [string]::IsNullOrWhiteSpace($NewsDataSource)) {
+    $sourceText = switch -Regex ($NewsDataSource.Trim()) {
+        '^(0|auto)$' { '0'; break }
+        '^(1|calendar)$' { '1'; break }
+        '^(2|csv)$' { '2'; break }
+        default { throw "NewsDataSource must be auto, calendar, csv, 0, 1, or 2." }
+    }
+    $config = $config -replace '(?m)^InpNewsDataSource=.*$', "InpNewsDataSource=$sourceText||0||0||2||N"
+}
 if (-not [string]::IsNullOrWhiteSpace($NewsCurrencies)) {
     $config = $config -replace '(?m)^InpNewsCurrencies=.*$', "InpNewsCurrencies=$NewsCurrencies"
+}
+if (-not [string]::IsNullOrWhiteSpace($NewsCsvFileName)) {
+    $config = $config -replace '(?m)^InpNewsCsvFileName=.*$', "InpNewsCsvFileName=$NewsCsvFileName"
 }
 if (-not [string]::IsNullOrWhiteSpace($NewsMinutesBefore)) {
     [int]$minutesBefore = 0

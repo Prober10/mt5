@@ -33,7 +33,9 @@ EA implication:
 Implementation:
 
 - `InpUseNewsGuard=false` by default.
+- `InpNewsDataSource=NEWS_SOURCE_AUTO`
 - `InpNewsCurrencies="USD"` by default for XAUUSD.
+- `InpNewsCsvFileName="FiboEA\high-impact-news.csv"`
 - `InpNewsMinutesBefore=2`
 - `InpNewsMinutesAfter=2`
 - `InpNewsCancelPendingMinutesBefore=5`
@@ -46,7 +48,11 @@ ticks. For larger funded accounts, use a wider pending-cancel buffer if needed.
 
 Backtesting note:
 
-MT5 Strategy Tester may not provide Economic Calendar access. With
-`InpNewsFailSafeBlock=true`, enabling the news guard in the tester can block all
-new entries with `calendar_unavailable`. Use normal strategy reports with
-`InpUseNewsGuard=false`, then test news behavior separately.
+MT5 Strategy Tester may not provide direct Economic Calendar access. The EA now
+supports a CSV news source for testing:
+
+- Run `ExportHighImpactNewsCsv` in the normal MT5 terminal to refresh
+  `Common\Files\FiboEA\high-impact-news.csv`.
+- In tester mode, `InpNewsDataSource=NEWS_SOURCE_AUTO` reads that CSV.
+- In live/demo mode, `InpNewsDataSource=NEWS_SOURCE_AUTO` uses the MT5 Economic
+  Calendar API.

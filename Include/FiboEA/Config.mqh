@@ -1,6 +1,13 @@
 #ifndef FIBO_EA_CONFIG_MQH
 #define FIBO_EA_CONFIG_MQH
 
+enum ENUM_NEWS_DATA_SOURCE
+  {
+   NEWS_SOURCE_AUTO = 0,
+   NEWS_SOURCE_CALENDAR = 1,
+   NEWS_SOURCE_CSV = 2
+  };
+
 input group "Signal"
 input ENUM_TIMEFRAMES InpSignalTimeframe = PERIOD_M15;
 input int             InpZigZagDepth = 12;
@@ -31,12 +38,14 @@ input double InpLotStep = 0.01;
 input double InpMinMarginLevelPercent = 500.0;
 
 input group "News Protection"
-input bool   InpUseNewsGuard = false;
-input string InpNewsCurrencies = "USD";
-input int    InpNewsMinutesBefore = 2;
-input int    InpNewsMinutesAfter = 2;
-input int    InpNewsCancelPendingMinutesBefore = 5;
-input bool   InpNewsFailSafeBlock = true;
+input bool                  InpUseNewsGuard = false;
+input ENUM_NEWS_DATA_SOURCE InpNewsDataSource = NEWS_SOURCE_AUTO;
+input string                InpNewsCurrencies = "USD";
+input string                InpNewsCsvFileName = "FiboEA\\high-impact-news.csv";
+input int                   InpNewsMinutesBefore = 2;
+input int                   InpNewsMinutesAfter = 2;
+input int                   InpNewsCancelPendingMinutesBefore = 5;
+input bool                  InpNewsFailSafeBlock = true;
 
 input group "Execution"
 input ulong InpMagicNumber = 790015;
