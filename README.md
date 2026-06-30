@@ -6,6 +6,10 @@ The first implementation is available in `FiboRetracementEA.mq5`, with focused
 modules under `Include/FiboEA`. The EA compiles against MetaTrader 5 with the
 standard `Examples\\ZigZag` indicator.
 
+An experimental strategy-neutral adaptive EA scaffold is available in
+`AdaptiveAI_EA.mq5`, with independent modules under `Include/AdaptiveAI`.
+It does not use the Fib strategy as its signal source.
+
 ## Current Scope
 
 - Platform: MetaTrader 5
@@ -25,6 +29,7 @@ the behavior implemented by the current code.
 Backtest findings are stored as dated notes under [`docs/backtests`](docs/backtests).
 Strategy experiments and decisions are tracked in
 [`docs/STRATEGY_EXPERIMENTS.md`](docs/STRATEGY_EXPERIMENTS.md).
+Adaptive EA design notes are stored under [`docs/adaptive-ai`](docs/adaptive-ai).
 
 ## Automated Backtest
 
@@ -61,3 +66,5 @@ events, swing/Fibonacci prices, spread, ATR/slope context, and trade deals.
 
 Open `FiboRetracementEA.mq5` in MetaEditor and compile it. Build output (`*.ex5`)
 is intentionally excluded from Git.
+
+For the adaptive prototype, open `AdaptiveAI_EA.mq5` in MetaEditor and compile it.

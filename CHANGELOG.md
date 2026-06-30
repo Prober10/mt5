@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Started a separate strategy-neutral adaptive EA prototype on
+  `codex/adaptive-ai-ea`.
+- Added adaptive EA documentation, module skeletons, ATR action templates,
+  market-state feature extraction, learning memory, diagnostics, and hard risk
+  controls.
 - Added a CSV-backed high-impact-news source so Strategy Tester can include
   funded-account news restrictions.
 - Added `ExportHighImpactNewsCsv` to export MT5 Economic Calendar events into
