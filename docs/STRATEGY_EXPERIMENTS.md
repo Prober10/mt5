@@ -334,7 +334,7 @@ window. It should:
 
 ### EXP-012: Core Session With Large-Swing Outside-Core Exception
 
-- Status: `Idea`
+- Status: `Deferred`
 - Summary: Keep the EXP-011 core session, but allow outside-core setups when
   the confirmed swing is unusually large.
 - Candidate rule:
@@ -357,4 +357,8 @@ window. It should:
     pending-order lifecycle, so the rule must be coded and tested before being
     trusted.
 - Acceptance status:
-  - Not accepted yet. This is the next candidate experiment.
+  - Not accepted.
+  - Deferred after monthly analysis. Positive but tiny slices such as `+$41`
+    over a half-year are not meaningful enough for a funded-account strategy.
+  - The next priority is regime-quality analysis, not another narrow session or
+    swing exception.
