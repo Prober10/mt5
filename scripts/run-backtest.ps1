@@ -6,6 +6,9 @@ param(
     [string]$FromDate,
     [string]$ToDate,
     [string]$UseBuySessionFilter,
+    [string]$UseCoreSessionFilter,
+    [string]$CoreSessionStartHour,
+    [string]$CoreSessionEndHour,
     [string]$UseSwingBandFilter,
     [string]$AvoidSwingMinPoints,
     [string]$AvoidSwingMaxPoints,
@@ -73,6 +76,28 @@ if (-not [string]::IsNullOrWhiteSpace($UseBuySessionFilter)) {
         default { throw "UseBuySessionFilter must be true/false, yes/no, or 1/0." }
     }
     $config = $config -replace '(?m)^InpUseBuySessionFilter=.*$', "InpUseBuySessionFilter=$filterText||false||0||true||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($UseCoreSessionFilter)) {
+    $filterText = switch -Regex ($UseCoreSessionFilter.Trim()) {
+        '^(1|true|yes)$' { 'true'; break }
+        '^(0|false|no)$' { 'false'; break }
+        default { throw "UseCoreSessionFilter must be true/false, yes/no, or 1/0." }
+    }
+    $config = $config -replace '(?m)^InpUseCoreSessionFilter=.*$', "InpUseCoreSessionFilter=$filterText||false||0||true||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($CoreSessionStartHour)) {
+    [int]$startHour = 0
+    if (-not [int]::TryParse($CoreSessionStartHour, [ref]$startHour) -or $startHour -lt 0 -or $startHour -gt 23) {
+        throw "CoreSessionStartHour must be an integer from 0 through 23."
+    }
+    $config = $config -replace '(?m)^InpCoreSessionStartHour=.*$', "InpCoreSessionStartHour=$startHour||12||0||23||N"
+}
+if (-not [string]::IsNullOrWhiteSpace($CoreSessionEndHour)) {
+    [int]$endHour = 0
+    if (-not [int]::TryParse($CoreSessionEndHour, [ref]$endHour) -or $endHour -lt 0 -or $endHour -gt 23) {
+        throw "CoreSessionEndHour must be an integer from 0 through 23."
+    }
+    $config = $config -replace '(?m)^InpCoreSessionEndHour=.*$', "InpCoreSessionEndHour=$endHour||17||0||23||N"
 }
 if (-not [string]::IsNullOrWhiteSpace($UseSwingBandFilter)) {
     $filterText = switch -Regex ($UseSwingBandFilter.Trim()) {

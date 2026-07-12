@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.10"
+#property version   "1.11"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"
@@ -34,6 +34,8 @@ bool InputsAreValid(void)
            InpFibonacciEntry > 0.0 && InpFibonacciEntry < 1.0 &&
            InpBuySessionStartHour >= 0 && InpBuySessionStartHour <= 23 &&
            InpBuySessionEndHour >= 0 && InpBuySessionEndHour <= 23 &&
+           InpCoreSessionStartHour >= 0 && InpCoreSessionStartHour <= 23 &&
+           InpCoreSessionEndHour >= 0 && InpCoreSessionEndHour <= 23 &&
            InpAvoidSwingMinPoints >= 0.0 &&
            InpAvoidSwingMaxPoints >= InpAvoidSwingMinPoints &&
            InpStopBuffer >= 0.0 &&
@@ -89,21 +91,43 @@ bool DailyTradingAllowed(void)
    return true;
   }
 
-bool BuySessionAllowsCurrentTime(void)
+bool HourIsInWindow(const int hour, const int start_hour, const int end_hour)
   {
-   if(!InpUseBuySessionFilter)
-      return true;
+   if(start_hour <= end_hour)
+      return (hour >= start_hour && hour <= end_hour);
 
+   return (hour >= start_hour || hour <= end_hour);
+  }
+
+int CurrentBrokerHour(void)
+  {
    datetime now = TimeTradeServer();
    if(now == 0)
       now = TimeCurrent();
 
    MqlDateTime parts;
    TimeToStruct(now, parts);
-   if(InpBuySessionStartHour <= InpBuySessionEndHour)
-      return (parts.hour >= InpBuySessionStartHour && parts.hour <= InpBuySessionEndHour);
+   return parts.hour;
+  }
 
-   return (parts.hour >= InpBuySessionStartHour || parts.hour <= InpBuySessionEndHour);
+bool BuySessionAllowsCurrentTime(void)
+  {
+   if(!InpUseBuySessionFilter)
+      return true;
+
+   return HourIsInWindow(CurrentBrokerHour(),
+                         InpBuySessionStartHour,
+                         InpBuySessionEndHour);
+  }
+
+bool CoreSessionAllowsCurrentTime(void)
+  {
+   if(!InpUseCoreSessionFilter)
+      return true;
+
+   return HourIsInWindow(CurrentBrokerHour(),
+                         InpCoreSessionStartHour,
+                         InpCoreSessionEndHour);
   }
 
 double SwingSizePoints(const SwingData &swing)
@@ -273,6 +297,14 @@ void OnTick(void)
       TradeSetup blocked_setup;
       ResetSetup(blocked_setup);
       g_diagnostics.LogSetupRejected(_Symbol, swing, blocked_setup, "buy_session_blocked");
+      return;
+     }
+
+   if(!CoreSessionAllowsCurrentTime())
+     {
+      TradeSetup blocked_setup;
+      ResetSetup(blocked_setup);
+      g_diagnostics.LogSetupRejected(_Symbol, swing, blocked_setup, "core_session_blocked");
       return;
      }
 

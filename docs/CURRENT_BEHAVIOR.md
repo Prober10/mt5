@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.10 of
+This document describes the behavior implemented by version 1.11 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -129,6 +129,18 @@ distance or is on the wrong side of the current market.
   order-expiration or cancellation rule is added.
 - Sell setups are not affected by this filter.
 
+## Core Session Filter
+
+- `InpUseCoreSessionFilter` defaults to `false`.
+- When enabled, both bullish and bearish setups are considered only during the
+  configured broker server-hour window.
+- The default candidate window is `12` through `17`, inclusive.
+- If the start hour is greater than the end hour, the session is treated as a
+  midnight-crossing window.
+- The filter controls setup placement time only. A pending limit placed during
+  the allowed window can still fill later outside that window unless another
+  order-cancellation rule removes it.
+
 ## Swing Band Filter
 
 - `InpUseSwingBandFilter` defaults to `false`.
@@ -153,6 +165,7 @@ distance or is on the wrong side of the current market.
 ## Current Boundaries
 
 - There is an optional swing-band filter, disabled by default.
+- There is an optional all-direction core-session filter, disabled by default.
 - There is an optional high-impact-news guard, disabled by default.
 - There is no spread filter.
 - There is no trailing stop, break-even rule, or partial close.

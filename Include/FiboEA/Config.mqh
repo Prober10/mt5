@@ -22,6 +22,9 @@ input group "Session Filters"
 input bool InpUseBuySessionFilter = false;
 input int  InpBuySessionStartHour = 13;
 input int  InpBuySessionEndHour = 23;
+input bool InpUseCoreSessionFilter = false;
+input int  InpCoreSessionStartHour = 12;
+input int  InpCoreSessionEndHour = 17;
 
 input group "Swing Filters"
 input bool   InpUseSwingBandFilter = false;

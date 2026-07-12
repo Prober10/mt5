@@ -293,7 +293,8 @@ window. It should:
 
 ### EXP-011: Core Setup Session Filter
 
-- Status: `Idea`
+- Status: `Promising validation candidate`
+- Code version: `1.11`
 - Summary: Add an optional all-direction setup session filter and test allowing
   setups only from `12` through `17` broker time.
 - Rationale:
@@ -307,9 +308,26 @@ window. It should:
   - 2025 H2 `12-17`: +485.21, PF 1.51
   - 2026 Jan-Feb `12-17`: +216.21, PF 1.57
   - 2026 Mar-Jun `12-17`: +61.62, PF 1.10
-- Required next test:
-  - Implement as a configurable all-direction setup filter.
-  - Test only with EXP-010 enabled.
-  - Keep EXP-005 and EXP-009 disabled.
+- Test configuration:
+  - `InpUseCoreSessionFilter=true`
+  - `InpCoreSessionStartHour=12`
+  - `InpCoreSessionEndHour=17`
+  - `InpUseSwingBandFilter=true`
+  - `InpUseNewsGuard=true`
+  - `InpNewsDataSource=NEWS_SOURCE_CSV`
+  - `InpUseBuySessionFilter=false`
+  - `InpPendingOrderExpirationHours=0`
+- Validation result:
+  - 2026 Mar-Jun: +188.58, PF 1.32, 32 trades, equity DD 138.94 / 1.36%
+  - 2026 Jan-Feb: +237.62, PF 1.59, 23 trades, equity DD 179.58 / 1.78%
+  - 2025 H2: +281.60, PF 1.22, 81 trades, equity DD 232.64 / 2.31%
+  - 2025 H1: +214.67, PF 1.17, 82 trades, equity DD 308.30 / 3.06%
+- Interpretation:
+  - EXP-011 fixed the weak 2025 H1 window and reduced drawdown strongly.
+  - It also cut many trades and gave up most net profit in 2026 Mar-Jun and
+    2025 H2.
+  - This is a risk/stability candidate, not proof of a better live edge.
 - Acceptance status:
-  - Not accepted yet. This is the next candidate experiment.
+  - Not accepted as production default yet.
+  - Next test should look for a less restrictive version or confirm that the
+    lower trade count is acceptable for the funded-account objective.
