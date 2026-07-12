@@ -1,5 +1,5 @@
 #property copyright "Prober10"
-#property version   "1.11"
+#property version   "1.12"
 #property strict
 
 #include "Include/FiboEA/Config.mqh"

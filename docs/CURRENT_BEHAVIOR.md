@@ -1,6 +1,6 @@
 # Current EA Behavior
 
-This document describes the behavior implemented by version 1.11 of
+This document describes the behavior implemented by version 1.12 of
 `FiboRetracementEA.mq5`. It records what the code does today; `SPEC.md`
 remains the source for the intended strategy rules.
 
@@ -184,6 +184,9 @@ distance or is on the wrong side of the current market.
 - Setup rows include direction, swing anchors, Fibonacci entry/SL/TP, volume,
   risk/reward distance, setup age, spread, equity, ATR(14), and a 20-bar slope
   snapshot.
+- Setup rows also include diagnostics-only H1/H4 context: 20-bar slope,
+  distance from a 50-bar average, 20-bar range efficiency, and trend alignment
+  with the setup direction.
 - Deal rows include deal/order/position identifiers, entry direction, realized
   profit, commission, swap, fee, and MT5 deal comments.
 - Diagnostics do not change strategy decisions or order placement behavior.

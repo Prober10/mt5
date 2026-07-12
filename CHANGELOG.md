@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added diagnostics-only H1/H4 regime context for setup analysis.
 - Added an optional all-direction core-session filter for EXP-011.
 - Added a CSV-backed high-impact-news source so Strategy Tester can include
   funded-account news restrictions.

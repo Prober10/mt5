@@ -362,3 +362,26 @@ window. It should:
     over a half-year are not meaningful enough for a funded-account strategy.
   - The next priority is regime-quality analysis, not another narrow session or
     swing exception.
+
+### EXP-013: Sell-Side H1 MA50 Alignment
+
+- Status: `Idea`
+- Summary: Keep buys unchanged, but allow sell setups only when the setup is
+  aligned with H1 MA50 context.
+- Rationale:
+  - HTF diagnostics showed H1 MA50 context was the strongest simple regime
+    feature.
+  - Sell setups aligned with H1 MA50 context were much stronger than sell setups
+    against it.
+- Diagnostic evidence:
+  - Buy H1 MA against: +430.98, PF 1.21, 120 trades
+  - Buy H1 MA aligned: +120.63, PF 1.04, 152 trades
+  - Sell H1 MA against: -246.31, PF 0.92, 179 trades
+  - Sell H1 MA aligned: +1,259.72, PF 1.79, 116 trades
+- Caveat:
+  - A simple what-if helped 2025 H1, 2025 H2, and 2026 Mar-Jun, but failed
+    2026 Jan-Feb.
+  - Do not accept unless the Jan-Feb failure is protected or the rule survives a
+    full Strategy Tester implementation with acceptable monthly behavior.
+- Acceptance status:
+  - Not accepted yet. Candidate for the next coded experiment.

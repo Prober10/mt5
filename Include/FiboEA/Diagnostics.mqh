@@ -11,6 +11,12 @@ struct DiagnosticMarketContext
    double equity;
    double atr14_points;
    double slope20_points;
+   double h1_slope20_points;
+   double h4_slope20_points;
+   double h1_ma50_distance_points;
+   double h4_ma50_distance_points;
+   double h1_range_efficiency20;
+   double h4_range_efficiency20;
   };
 
 class CDiagnostics
@@ -79,6 +85,71 @@ private:
       return MathAbs(first_price - second_price) / point;
      }
 
+   void FillTimeframeContext(const string symbol,
+                             const ENUM_TIMEFRAMES timeframe,
+                             double &slope20_points,
+                             double &ma50_distance_points,
+                             double &range_efficiency20) const
+     {
+      slope20_points = 0.0;
+      ma50_distance_points = 0.0;
+      range_efficiency20 = 0.0;
+
+      const double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
+      if(point <= 0.0)
+         return;
+
+      MqlRates rates[];
+      const int copied = CopyRates(symbol, timeframe, 1, 51, rates);
+      if(copied < 21)
+         return;
+
+      const int last = copied - 1;
+      const int slope_start = MathMax(0, last - 20);
+      slope20_points = (rates[last].close - rates[slope_start].close) / point;
+
+      double close_sum = 0.0;
+      const int ma_start = MathMax(0, copied - 50);
+      int ma_count = 0;
+      for(int index = ma_start; index < copied; ++index)
+        {
+         close_sum += rates[index].close;
+         ++ma_count;
+        }
+      if(ma_count > 0)
+        {
+         const double ma = close_sum / (double)ma_count;
+         ma50_distance_points = (rates[last].close - ma) / point;
+        }
+
+      double path = 0.0;
+      for(int index = slope_start + 1; index <= last; ++index)
+         path += MathAbs(rates[index].close - rates[index - 1].close);
+
+      if(path > 0.0)
+         range_efficiency20 = MathAbs(rates[last].close - rates[slope_start].close) / path;
+     }
+
+   int AlignmentScore(const SwingDirection direction, const double slope_points) const
+     {
+      if(direction == SWING_DIRECTION_BULLISH)
+        {
+         if(slope_points > 0.0)
+            return 1;
+         if(slope_points < 0.0)
+            return -1;
+        }
+      if(direction == SWING_DIRECTION_BEARISH)
+        {
+         if(slope_points < 0.0)
+            return 1;
+         if(slope_points > 0.0)
+            return -1;
+        }
+
+      return 0;
+     }
+
    DiagnosticMarketContext MarketContext(const string symbol) const
      {
       DiagnosticMarketContext context;
@@ -88,6 +159,12 @@ private:
       context.equity = AccountInfoDouble(ACCOUNT_EQUITY);
       context.atr14_points = 0.0;
       context.slope20_points = 0.0;
+      context.h1_slope20_points = 0.0;
+      context.h4_slope20_points = 0.0;
+      context.h1_ma50_distance_points = 0.0;
+      context.h4_ma50_distance_points = 0.0;
+      context.h1_range_efficiency20 = 0.0;
+      context.h4_range_efficiency20 = 0.0;
 
       const double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
       MqlTick tick;
@@ -123,6 +200,15 @@ private:
          context.slope20_points = (rates[copied - 1].close - rates[0].close) / point;
         }
 
+      FillTimeframeContext(symbol, PERIOD_H1,
+                           context.h1_slope20_points,
+                           context.h1_ma50_distance_points,
+                           context.h1_range_efficiency20);
+      FillTimeframeContext(symbol, PERIOD_H4,
+                           context.h4_slope20_points,
+                           context.h4_ma50_distance_points,
+                           context.h4_range_efficiency20);
+
       return context;
      }
 
@@ -144,6 +230,8 @@ private:
       const double setup_age_minutes = (setup.valid && setup.swing.end_time > 0)
                                        ? (double)(TimeCurrent() - setup.swing.end_time) / 60.0
                                        : 0.0;
+      const int h1_alignment = AlignmentScore(swing.direction, context.h1_slope20_points);
+      const int h4_alignment = AlignmentScore(swing.direction, context.h4_slope20_points);
 
       FileWrite(m_handle,
                 TimeText(TimeCurrent()), event_name, symbol, EnumToString(m_timeframe),
@@ -153,6 +241,10 @@ private:
                 risk_points, reward_points, setup_age_minutes,
                 context.spread_points, context.bid, context.ask, context.equity,
                 context.atr14_points, context.slope20_points,
+                context.h1_slope20_points, context.h4_slope20_points,
+                context.h1_ma50_distance_points, context.h4_ma50_distance_points,
+                context.h1_range_efficiency20, context.h4_range_efficiency20,
+                h1_alignment, h4_alignment,
                 result, reason, "", "", "", "", "", 0.0, 0.0, 0.0, 0.0, comment);
       FileFlush(m_handle);
      }
@@ -189,6 +281,10 @@ public:
                 "swing_points", "entry", "stop_loss", "take_profit", "volume",
                 "risk_points", "reward_points", "setup_age_minutes",
                 "spread_points", "bid", "ask", "equity", "atr14_points", "slope20_points",
+                "h1_slope20_points", "h4_slope20_points",
+                "h1_ma50_distance_points", "h4_ma50_distance_points",
+                "h1_range_efficiency20", "h4_range_efficiency20",
+                "h1_alignment", "h4_alignment",
                 "result", "reason", "deal", "order", "position", "deal_type", "deal_entry",
                 "profit", "commission", "swap", "fee", "comment");
       FileFlush(m_handle);
@@ -244,6 +340,10 @@ public:
                 HistoryDealGetDouble(deal_ticket, DEAL_VOLUME), 0.0, 0.0, 0.0,
                 context.spread_points, context.bid, context.ask, context.equity,
                 context.atr14_points, context.slope20_points,
+                context.h1_slope20_points, context.h4_slope20_points,
+                context.h1_ma50_distance_points, context.h4_ma50_distance_points,
+                context.h1_range_efficiency20, context.h4_range_efficiency20,
+                0, 0,
                 "", "", (string)deal_ticket,
                 (string)HistoryDealGetInteger(deal_ticket, DEAL_ORDER),
                 (string)HistoryDealGetInteger(deal_ticket, DEAL_POSITION_ID),
