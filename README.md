@@ -25,6 +25,8 @@ the behavior implemented by the current code.
 Backtest findings are stored as dated notes under [`docs/backtests`](docs/backtests).
 Strategy experiments and decisions are tracked in
 [`docs/STRATEGY_EXPERIMENTS.md`](docs/STRATEGY_EXPERIMENTS.md).
+The long-term research rules for deciding what is worth accepting are documented
+in [`docs/RESEARCH_PROTOCOL.md`](docs/RESEARCH_PROTOCOL.md).
 
 ## Automated Backtest
 
