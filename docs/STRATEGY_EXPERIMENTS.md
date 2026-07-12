@@ -279,6 +279,13 @@ window. It should:
   - EXP-010: -421.89, PF 0.89, 223 trades, equity DD 775.03 / 7.66%
   - EXP-010 reduced the loss and drawdown, but the window remained unsuitable
     for funded-account deployment.
+- v1.10 news CSV validation:
+  - 2026 Mar-Jun: +542.37, PF 1.28, 102 trades, equity DD 259.58 / 2.42%
+  - 2026 Jan-Feb: +284.97, PF 1.25, 58 trades, equity DD 265.16 / 2.62%
+  - 2025 H2: +1,013.70, PF 1.34, 195 trades, equity DD 240.03 / 2.15%
+  - 2025 H1: -276.02, PF 0.92, 212 trades, equity DD 619.55 / 6.13%
+  - News protection reduced trade count and drawdown in every window. It did
+    not fix 2025 H1, but it made the weak window less severe.
 - Acceptance status:
   - Accepted as the current best candidate strategy layer.
   - Keep configurable. Do not make it the production default until the 2025 H1

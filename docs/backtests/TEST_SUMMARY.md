@@ -16,6 +16,7 @@ pending orders.
 | v1.06 EXP-005 with lot/margin guard | Current discovery | 1,070.29 | 1.37 | 147 | 280.21 / 2.61% | 0.0572 | 0.0538 | 0.0595 | Current best discovery result |
 | v1.07 EXP-009 6h pending expiration | Discovery | 1,193.71 | 1.44 | 139 | 273.60 / 2.56% | 0.0586 | 0.0568 | 0.0598 | Best discovery result so far |
 | v1.08 EXP-010 swing band filter | Current candidate | 622.53 | 1.31 | 106 | 279.45 / 2.60% | 0.0512 | 0.0509 | 0.0515 | Tested alone against baseline |
+| v1.10 EXP-010 + news CSV guard | Current funded-rule candidate | 542.37 | 1.28 | 102 | 259.58 / 2.42% | 0.0522 | n/a | n/a | Includes high-impact USD news restriction |
 
 ## Validation Window: 2026-01-01 to 2026-02-28
 
@@ -27,6 +28,7 @@ pending orders.
 | v1.06 EXP-005 with lot/margin guard | Current validation | 50.06 | 1.03 | 88 | 420.96 / 4.11% | 0.0518 | 0.0457 | 0.0550 | Still improves Jan-Feb modestly |
 | v1.07 EXP-009 6h pending expiration | Validation | 88.26 | 1.05 | 86 | 383.22 / 3.74% | 0.0535 | 0.0467 | 0.0571 | Improves Jan-Feb versus EXP-005 |
 | v1.08 EXP-010 swing band filter | Current candidate | 377.54 | 1.31 | 64 | 307.26 / 3.04% | 0.0495 | 0.0472 | 0.0514 | Strongest Jan-Feb result so far |
+| v1.10 EXP-010 + news CSV guard | Current funded-rule candidate | 284.97 | 1.25 | 58 | 265.16 / 2.62% | 0.0505 | n/a | n/a | Lower net, lower drawdown |
 
 ## Validation Window: 2025-07-01 to 2025-12-31
 
@@ -36,6 +38,7 @@ pending orders.
 | v1.07 EXP-005 buy setup session filter | Mixed validation | 513.37 | 1.12 | 236 | 479.84 / 4.77% | 0.0812 | 0.0846 | 0.0796 | Reduced trades but worsened net and DD |
 | v1.07 EXP-009 6h pending expiration | Mixed validation | 421.71 | 1.10 | 229 | 534.55 / 5.31% | 0.0823 | 0.0869 | 0.0802 | Helped September, hurt the full window |
 | v1.08 EXP-010 swing band filter | Current candidate | 992.61 | 1.32 | 203 | 271.94 / 2.65% | 0.0883 | 0.0852 | 0.0910 | Improved 2025 H2 unlike EXP-005/009 |
+| v1.10 EXP-010 + news CSV guard | Current funded-rule candidate | 1,013.70 | 1.34 | 195 | 240.03 / 2.15% | 0.0883 | n/a | n/a | Slightly better net and DD with news restriction |
 
 ## Validation Window: 2025-01-01 to 2025-06-30
 
@@ -43,6 +46,7 @@ pending orders.
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | v1.08 baseline with lot/margin guard | Validation baseline | -772.65 | 0.87 | 300 | 1,200.02 / 11.80% | 0.0870 | 0.0863 | 0.0876 | Weak regime; not funded-safe |
 | v1.08 EXP-010 swing band filter | Current candidate | -421.89 | 0.89 | 223 | 775.03 / 7.66% | 0.0938 | 0.0926 | 0.0950 | Improved but still losing |
+| v1.10 EXP-010 + news CSV guard | Current funded-rule candidate | -276.02 | 0.92 | 212 | 619.55 / 6.13% | 0.0943 | n/a | n/a | News guard reduced loss and DD, but still not funded-safe |
 
 ## Side Split Highlights
 
@@ -134,10 +138,12 @@ EXP-010 tested that hypothesis by skipping confirmed swings between `2500` and
 `5000` points. It improved all four tested windows while reducing drawdown and
 keeping max lot at `0.10`.
 
-It is now the current best candidate strategy layer, but not production-ready:
-2025 H1 still lost money and reached `7.66%` equity drawdown with EXP-010. The
-next strategy step should analyze that weak regime before making EXP-010 the
-default or stacking more filters.
+It is now the current best candidate strategy layer. With the v1.10 CSV news
+guard included, EXP-010 stayed positive in three of four windows and reduced
+drawdown in all windows compared with the no-news EXP-010 tests. It is still not
+production-ready: 2025 H1 still lost money and reached `6.13%` equity drawdown
+with the funded news guard enabled. The next strategy step should analyze that
+weak regime before making EXP-010 the default or stacking more filters.
 
 2025 H1 weakness analysis points to setup time as the next candidate area:
 after EXP-010, the `12-17` broker-time setup block was positive in every tested
