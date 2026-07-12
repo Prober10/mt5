@@ -331,3 +331,30 @@ window. It should:
   - Not accepted as production default yet.
   - Next test should look for a less restrictive version or confirm that the
     lower trade count is acceptable for the funded-account objective.
+
+### EXP-012: Core Session With Large-Swing Outside-Core Exception
+
+- Status: `Idea`
+- Summary: Keep the EXP-011 core session, but allow outside-core setups when
+  the confirmed swing is unusually large.
+- Candidate rule:
+  - Allow all setups from `12` through `17` broker time.
+  - Outside `12-17`, allow setups only when confirmed swing size is at least
+    `8000` points.
+- Rationale:
+  - EXP-011 reduced risk but removed too many profitable outside-core trades.
+  - EXP-011 removal analysis showed outside-core `8000+` swing trades were
+    positive in every tested window.
+  - This has a market-structure rationale: very large confirmed impulses may
+    produce higher-quality retracement setups even outside the cleanest session.
+- Diagnostic what-if from EXP-010 + news CSV executed trades:
+  - 2025 H1: +566.71, PF 1.63, 69 trades
+  - 2025 H2: +490.83, PF 1.50, 70 trades
+  - 2026 Jan-Feb: +259.86, PF 1.51, 30 trades
+  - 2026 Mar-Jun: +478.43, PF 1.73, 43 trades
+- Caveat:
+  - This is not a real Strategy Tester result. Blocking setups changes
+    pending-order lifecycle, so the rule must be coded and tested before being
+    trusted.
+- Acceptance status:
+  - Not accepted yet. This is the next candidate experiment.
